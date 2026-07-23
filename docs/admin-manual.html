@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NamasteExpress — Admin Panel User Manual</title>
+<style>
+  @page { margin: 22mm 16mm 20mm 16mm; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    font-family: "Segoe UI", "Calibri", Arial, sans-serif;
+    color: #1f2937; font-size: 11.5px; line-height: 1.6; margin: 0;
+  }
+  h1, h2, h3, h4 { color: #b3261e; font-family: "Segoe UI Semibold","Segoe UI",Arial,sans-serif; line-height: 1.25; }
+  h2 { font-size: 19px; border-bottom: 2px solid #c62828; padding-bottom: 6px; margin-top: 34px; }
+  h3 { font-size: 15px; color: #9a1c16; margin-top: 22px; }
+  h4 { font-size: 12.5px; color: #444; margin: 14px 0 4px; }
+  p { margin: 6px 0; }
+  ul, ol { margin: 6px 0 10px; padding-left: 20px; }
+  li { margin: 3px 0; }
+  code { background: #f3f4f6; padding: 1px 5px; border-radius: 4px; font-family: "Consolas", monospace; font-size: 10.5px; color: #b3261e; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 10.5px; }
+  th, td { border: 1px solid #d1d5db; padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: #c62828; color: #fff; font-weight: 600; }
+  tr:nth-child(even) td { background: #fbf3f3; }
+  .note { background: #fff7ed; border-left: 4px solid #ea9b0c; padding: 8px 12px; margin: 10px 0; border-radius: 4px; }
+  .warn { background: #fef2f2; border-left: 4px solid #dc2626; padding: 8px 12px; margin: 10px 0; border-radius: 4px; }
+  .tip  { background: #eff6ff; border-left: 4px solid #2563eb; padding: 8px 12px; margin: 10px 0; border-radius: 4px; }
+  .pill { display: inline-block; padding: 1px 8px; border-radius: 999px; color: #fff; font-size: 9.5px; font-weight: 600; }
+  .pg { page-break-before: always; }
+  .nobreak { page-break-inside: avoid; }
+  .role { font-size: 9.5px; font-weight: 600; color:#fff; background:#6b7280; border-radius:4px; padding:1px 6px; }
+  .role.admin { background:#b3261e; } .role.editor { background:#2563eb; } .role.author { background:#16a34a; }
+
+  /* Cover */
+  .cover { height: 250mm; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+  .cover .logo { width: 84px; height: 84px; border-radius: 18px; background: #c62828; color:#fff; display:flex; align-items:center; justify-content:center; font-size: 44px; font-weight:bold; margin-bottom: 26px; }
+  .cover h1 { font-size: 40px; margin: 0; color:#b3261e; }
+  .cover .sub { font-size: 17px; color:#444; margin-top: 10px; }
+  .cover .ne { font-size: 22px; color:#c62828; margin-top: 4px; }
+  .cover .meta { margin-top: 60px; font-size: 12px; color:#6b7280; }
+  .toc ol { font-size: 12px; }
+  .toc li { margin: 4px 0; }
+</style>
+</head>
+<body>
+
+<!-- ===================== COVER ===================== -->
+<section class="cover">
+  <div class="logo">न</div>
+  <h1>Admin Panel User Manual</h1>
+  <div class="ne">नमस्ते एक्सप्रेस — प्रशासन पुस्तिका</div>
+  <div class="sub">NamasteExpress — A Complete Guide to Running the News Portal</div>
+  <div class="meta">
+    Version 1.0 &nbsp;·&nbsp; Built on Next.js 16, Prisma &amp; PostgreSQL<br>
+    Comprehensive reference for Administrators, Editors &amp; Authors
+  </div>
+</section>
+
+<!-- ===================== TOC ===================== -->
+<section class="pg toc">
+  <h2>Table of Contents</h2>
+  <ol>
+    <li>Introduction &amp; System Overview</li>
+    <li>User Roles &amp; Permissions</li>
+    <li>Logging In &amp; Account Access</li>
+    <li>The Admin Layout (Sidebar, Theme, Language, Font)</li>
+    <li>Dashboard</li>
+    <li>Articles — Create, Edit, Publish, Delete</li>
+    <li>Categories</li>
+    <li>Tags</li>
+    <li>Comments Moderation</li>
+    <li>Media Library</li>
+    <li>Advertisements &amp; Ad Positions</li>
+    <li>Sports (Tournaments &amp; Matches)</li>
+    <li>Reels</li>
+    <li>Galleries</li>
+    <li>Breaking News</li>
+    <li>Analytics</li>
+    <li>Holidays (Nepali Calendar)</li>
+    <li>Gold &amp; Silver Prices</li>
+    <li>Forex Rates</li>
+    <li>Rashifal (Horoscope)</li>
+    <li>Newsletter Subscribers</li>
+    <li>Users Management</li>
+    <li>Settings</li>
+    <li>Audit Log</li>
+    <li>Common Conventions &amp; Quick Reference</li>
+    <li>Troubleshooting &amp; FAQ</li>
+  </ol>
+</section>
+
+<!-- ===================== 1. INTRODUCTION ===================== -->
+<section class="pg">
+<h2>1. Introduction &amp; System Overview</h2>
+<p><strong>NamasteExpress (नमस्ते एक्सप्रेस)</strong> is a full-featured bilingual (Nepali + English) news portal. The Admin Panel is the private control center where your team writes news, manages the calendar widgets (holidays, gold/silver, forex, rashifal), moderates reader comments, runs advertisements, and configures the whole site.</p>
+
+<h3>What you can manage from the Admin Panel</h3>
+<ul>
+  <li><strong>Content:</strong> Articles, Categories, Tags, Media files, Reels (short videos), Photo Galleries, Breaking-news tickers.</li>
+  <li><strong>Nepali calendar data:</strong> Holidays, Gold &amp; Silver prices, Foreign-exchange (Forex) rates, Daily Rashifal (horoscope).</li>
+  <li><strong>Community:</strong> Comment moderation, Newsletter subscribers.</li>
+  <li><strong>Monetisation:</strong> Advertisements and ad positions.</li>
+  <li><strong>Administration:</strong> Users &amp; roles, Site Settings, Analytics, and a security Audit Log.</li>
+</ul>
+
+<h3>How to reach the Admin Panel</h3>
+<p>Open your site in a browser and go to the <code>/admin</code> path — for example <code>https://your-site.com/admin</code>. You must be signed in with an Admin, Editor, or Author account. If you are not signed in you will be sent to the login page; if you are signed in with a reader account you will be sent back to the public homepage.</p>
+
+<div class="note"><strong>Language of the interface:</strong> Most labels appear in Nepali with smaller English sub-labels. You can flip every menu label to English using the <strong>EN / ने</strong> toggle in the sidebar header (see Section 4).</div>
+</section>
+
+<!-- ===================== 2. ROLES ===================== -->
+<section class="pg">
+<h2>2. User Roles &amp; Permissions</h2>
+<p>Every account has one of four roles. The role decides which menu items appear and what actions are allowed. The panel hides menu items you cannot use, so two people may see different menus.</p>
+
+<table class="nobreak">
+  <tr><th>Role</th><th>Intended for</th><th>Can do</th></tr>
+  <tr><td><span class="role admin">ADMIN</span></td><td>Site owner / manager</td><td>Everything — full access to all 20 sections including Users, Settings, Ads, Newsletter, and Audit Log.</td></tr>
+  <tr><td><span class="role editor">EDITOR</span></td><td>Newsroom editor</td><td>All content + calendar data + comments + analytics. <em>Cannot</em> manage Users, Settings, Ads, Newsletter, or view the Audit Log.</td></tr>
+  <tr><td><span class="role author">AUTHOR</span></td><td>Reporter / writer</td><td>Dashboard, Articles, and Media only. Writes and edits articles and uploads images.</td></tr>
+  <tr><td><span class="role">READER</span></td><td>Public visitor</td><td>No admin access. Can read, comment, bookmark, and subscribe on the public site only.</td></tr>
+</table>
+
+<h3>Menu visibility by role</h3>
+<table>
+  <tr><th>Section</th><th>Admin</th><th>Editor</th><th>Author</th></tr>
+  <tr><td>Dashboard</td><td>✔</td><td>✔</td><td>✔</td></tr>
+  <tr><td>Articles</td><td>✔</td><td>✔</td><td>✔</td></tr>
+  <tr><td>Media</td><td>✔</td><td>✔</td><td>✔</td></tr>
+  <tr><td>Categories, Tags, Comments</td><td>✔</td><td>✔</td><td>—</td></tr>
+  <tr><td>Sports, Reels, Galleries, Breaking News</td><td>✔</td><td>✔</td><td>—</td></tr>
+  <tr><td>Analytics, Holidays, Gold-Silver, Forex, Rashifal</td><td>✔</td><td>✔</td><td>—</td></tr>
+  <tr><td>Ads, Newsletter, Users, Settings, Audit Log</td><td>✔</td><td>—</td><td>—</td></tr>
+</table>
+<div class="warn"><strong>Self-protection rule:</strong> An Admin cannot change their own role (the dropdown becomes a read-only badge for your own account). This prevents accidentally locking yourself out of admin access.</div>
+</section>
+
+<!-- ===================== 3. LOGGING IN ===================== -->
+<section class="pg">
+<h2>3. Logging In &amp; Account Access</h2>
+
+<h3>3.1 Signing in</h3>
+<ol>
+  <li>Go to <code>/auth/login</code> (or try to open <code>/admin</code>, which redirects you there).</li>
+  <li>Enter your <strong>Email</strong> and <strong>Password</strong>.</li>
+  <li>Click <strong>Login</strong>. On success you land on the Dashboard.</li>
+  <li>Alternatively, click <strong>Login with Google</strong> to sign in with a Google account (the account must already exist with an admin-level role to reach the panel).</li>
+</ol>
+
+<h3>3.2 Default seeded accounts</h3>
+<p>On a freshly seeded database, three demo accounts exist. <strong>Change these passwords immediately on a live site.</strong></p>
+<table>
+  <tr><th>Role</th><th>Email</th><th>Password</th></tr>
+  <tr><td>Admin</td><td><code>admin@namastexpress.com</code></td><td><code>Admin@12345</code></td></tr>
+  <tr><td>Editor</td><td><code>editor@namastexpress.com</code></td><td><code>Editor@12345</code></td></tr>
+  <tr><td>Author</td><td><code>author@namastexpress.com</code></td><td><code>Author@12345</code></td></tr>
+</table>
+
+<h3>3.3 Forgot password</h3>
+<p>On the login screen, click <strong>Forgot password?</strong> to start the email-based reset flow at <code>/auth/forgot-password</code>. A reset link is sent to the registered email address.</p>
+
+<h3>3.4 Logging out</h3>
+<p>Use the <strong>Logout / लगआउट</strong> button at the bottom of the sidebar. You are returned to the public homepage.</p>
+
+<div class="warn"><strong>Security:</strong> The panel is protected on the server — every admin page re-checks your role on each request. Never share your credentials. Use the Audit Log (Admins) to review who changed what.</div>
+</section>
+
+<!-- ===================== 4. LAYOUT ===================== -->
+<section class="pg">
+<h2>4. The Admin Layout</h2>
+<p>Every admin screen shares the same frame: a fixed <strong>left sidebar</strong> for navigation and a scrollable <strong>main area</strong> on the right.</p>
+
+<h3>4.1 The sidebar</h3>
+<ul>
+  <li><strong>Brand header:</strong> Shows the site logo (or a “न” badge) and “Admin Panel”. Click it to jump back to the Dashboard.</li>
+  <li><strong>Navigation list:</strong> Menu items filtered by your role. The current page is highlighted. Each item shows an icon, a Nepali label, and a smaller English label.</li>
+  <li><strong>EN / ने toggle</strong> (top-right of the header): Switches all menu labels between Nepali and English. Your choice is remembered in the browser.</li>
+</ul>
+
+<h3>4.2 Footer controls (bottom of sidebar)</h3>
+<table>
+  <tr><th>Control</th><th>What it does</th></tr>
+  <tr><td><strong>Font size — A- / A / A+</strong></td><td>Shrinks, resets, or enlarges the panel text. The setting is saved in your browser and persists between visits.</td></tr>
+  <tr><td><strong>Dark Mode / Light Mode (🌙 / ☀️)</strong></td><td>Toggles the admin colour theme. Saved per browser.</td></tr>
+  <tr><td><strong>Back to site</strong></td><td>Opens the public website homepage.</td></tr>
+  <tr><td><strong>Logout</strong></td><td>Signs you out and returns to the homepage.</td></tr>
+</table>
+
+<h3>4.3 On mobile / small screens</h3>
+<p>The sidebar collapses. Tap the <strong>hamburger (☰) button</strong> at the top-left to open the menu; tap the <strong>✕</strong> or the dark overlay to close it. Selecting any menu item closes the drawer automatically.</p>
+
+<div class="tip"><strong>Autopilot:</strong> All theme, language, and font preferences are personal to your browser and do not affect what visitors or other admins see.</div>
+</section>
+
+<!-- ===================== 5. DASHBOARD ===================== -->
+<section class="pg">
+<h2>5. Dashboard</h2>
+<p class="note">Menu: <strong>ड्यासबोर्ड / Dashboard</strong> &nbsp;·&nbsp; Access: <span class="role admin">ADMIN</span> <span class="role editor">EDITOR</span> <span class="role author">AUTHOR</span></p>
+<p>The Dashboard is your landing page and a live snapshot of the whole site. Everything here is read-only summary data with shortcut links — you do not edit anything directly on this page.</p>
+
+<h3>5.1 Top action buttons</h3>
+<ul>
+  <li><strong>🌐 साइट हेर्नुहोस् (View Site):</strong> Opens the public homepage.</li>
+  <li><strong>+ नयाँ लेख (New Article):</strong> Jumps straight to the article editor.</li>
+</ul>
+
+<h3>5.2 Stat cards (top row)</h3>
+<p>Six clickable cards, each links to the matching section:</p>
+<table>
+  <tr><th>Card</th><th>Shows</th><th>Links to</th></tr>
+  <tr><td>कुल लेखहरू (Total Articles)</td><td>Total article count + how many are published</td><td>Articles</td></tr>
+  <tr><td>कुल भ्युज (Total Views)</td><td>Lifetime view count + today’s page views</td><td>Analytics</td></tr>
+  <tr><td>टिप्पणीहरू (Comments)</td><td>Pending count + approved count</td><td>Comments</td></tr>
+  <tr><td>विज्ञापन (Ads)</td><td>Number of active advertisements</td><td>Ads</td></tr>
+  <tr><td>प्रयोगकर्ता (Users)</td><td>New users in the last 7 days</td><td>Users</td></tr>
+  <tr><td>ट्यागहरू (Tags)</td><td>Total tags + total categories</td><td>Tags</td></tr>
+</table>
+
+<h3>5.3 Today’s Activity panel (आजको गतिविधि)</h3>
+<ul>
+  <li>Articles published today, page views today (with an ↑/↓ % trend vs yesterday), new users today, and pending comments.</li>
+  <li>A <strong>This month vs last month</strong> comparison of published articles with a percentage trend badge.</li>
+</ul>
+
+<h3>5.4 Category breakdown (वर्ग अनुसार लेखहरू)</h3>
+<p>Horizontal bars showing how many published articles each of your top 5 categories holds. Includes a <strong>व्यवस्थापन → (Manage)</strong> link to Categories and quick links to <strong>New Article</strong>, <strong>Analytics</strong>, and <strong>Settings</strong>.</p>
+
+<h3>5.5 Recent Articles (हालका लेखहरू)</h3>
+<p>A table of the 8 most recently created articles: title (click to edit), category, status badge, author, view count, and date. Use <strong>सबै हेर्नुहोस् → (View all)</strong> to open the full Articles list.</p>
+</section>
+
+<!-- ===================== 6. ARTICLES ===================== -->
+<section class="pg">
+<h2>6. Articles — Create, Edit, Publish, Delete</h2>
+<p class="note">Menu: <strong>लेखहरू / Articles</strong> &nbsp;·&nbsp; Access: <span class="role admin">ADMIN</span> <span class="role editor">EDITOR</span> <span class="role author">AUTHOR</span></p>
+<p>This is the heart of the news portal. Articles support both Nepali and English fields, draft/publish workflow, featured images, tags, and an AI summary.</p>
+
+<h3>6.1 The article list</h3>
+<ul>
+  <li><strong>+ New Article</strong> button (top-right) opens the create form.</li>
+  <li><strong>Search box:</strong> Finds articles by Nepali or English title (case-insensitive).</li>
+  <li><strong>Status filter:</strong> All Status / Draft / Published / Archived. Click <strong>Filter</strong> to apply.</li>
+  <li><strong>Table columns:</strong> Title (click to edit), Category, Status badge, Author, Views, Date.</li>
+  <li><strong>Pagination:</strong> 20 articles per page with Previous / Next at the bottom.</li>
+</ul>
+<table class="nobreak">
+  <tr><th>Status</th><th>Meaning</th></tr>
+  <tr><td><span class="pill" style="background:#6b7280">DRAFT</span></td><td>Work in progress. Not visible to the public.</td></tr>
+  <tr><td><span class="pill" style="background:#16a34a">PUBLISHED</span></td><td>Live and visible on the public site.</td></tr>
+  <tr><td><span class="pill" style="background:#ca8a04">ARCHIVED</span></td><td>Retired/hidden but kept in the system.</td></tr>
+</table>
+
+<h3>6.2 Creating a new article</h3>
+<p>The form has two columns — main content on the left, publishing options on the right.</p>
+<h4>Main content (left)</h4>
+<table>
+  <tr><th>Field</th><th>Required</th><th>Notes</th></tr>
+  <tr><td>Title (Nepali)</td><td>Yes</td><td>The headline shown on the site.</td></tr>
+  <tr><td>Title (English)</td><td>No</td><td>Optional English headline.</td></tr>
+  <tr><td>Slug</td><td>Yes</td><td>The URL piece. Auto-generated from the Nepali title (supports Devanagari and Latin). You can edit it manually.</td></tr>
+  <tr><td>Excerpt</td><td>No</td><td>Short summary used in listings/previews.</td></tr>
+  <tr><td>Content</td><td>Yes</td><td>The article body. A live counter shows word count and estimated reading time (≈200 words/min).</td></tr>
+  <tr><td>AI Summary</td><td>No</td><td>An optional short summary that can appear as a quick read-up.</td></tr>
+</table>
+<h4>Sidebar options (right)</h4>
+<table>
+  <tr><th>Field</th><th>Notes</th></tr>
+  <tr><td>Status</td><td>Draft / Published / Archived. Choose Published to make it live immediately.</td></tr>
+  <tr><td>Category</td><td>Required. Pick one from the dropdown (loaded from your Categories).</td></tr>
+  <tr><td>Tags</td><td>Tick any number of tags from the scrollable list.</td></tr>
+  <tr><td>Featured Image</td><td>Paste an image URL, or click <strong>Upload</strong> to pick a file from your computer — it uploads and fills the URL automatically.</td></tr>
+  <tr><td>Featured Article</td><td>Tick to highlight this article in featured placements on the site.</td></tr>
+</table>
+<p>Click <strong>Create Article</strong> to save. The button shows “Creating…” while it works, then returns you to the article list. Errors (e.g. missing required fields or a duplicate slug) appear in a red box at the top.</p>
+
+<h3>6.3 Editing an existing article</h3>
+<p>Click any article title to open the editor. It shows the same fields as the create form, plus:</p>
+<ul>
+  <li><strong>Read-only stat cards:</strong> views, comment count, created date, and current status (colour-coded).</li>
+  <li><strong>Slug “Regenerate” button</strong> to rebuild the slug from the current Nepali title.</li>
+  <li>Separate <strong>Excerpt (English)</strong> and <strong>Content (English)</strong> fields in addition to the Nepali ones.</li>
+  <li>A featured-image preview that appears once a URL is set.</li>
+  <li><strong>💾 Save Changes</strong> (परिवर्तन सेभ गर्नुहोस्) — shows “Saving…”, then a green success message.</li>
+  <li>If the article is Published, a <strong>🌐 View on site</strong> link opens the live page in a new tab.</li>
+  <li>An <strong>Info card</strong> listing the author, article ID, and created / published / last-updated dates.</li>
+</ul>
+
+<h3>6.4 Deleting an article</h3>
+<p>In the editor, click the red <strong>🗑 लेख मेट्नुहोस् (Delete Article)</strong> button. A confirmation dialog appears. </p>
+<div class="warn"><strong>Deletion is permanent.</strong> Once confirmed, the article cannot be recovered. If you only want to hide it, set its status to <strong>Archived</strong> instead.</div>
+</section>
+<!-- ===================== 7. CATEGORIES ===================== -->
+<section class="pg">
+<h2>7. Categories</h2>
+<p class="note">Menu: <strong>वर्गहरू / Categories</strong> &nbsp;·&nbsp; Access: <span class="role admin">ADMIN</span> <span class="role editor">EDITOR</span></p>
+<p>Categories are the main sections of your news site (e.g. Politics, Sports, Economy). Every article belongs to exactly one category.</p>
+
+<h3>7.1 Create / edit form</h3>
+<table>
+  <tr><th>Field</th><th>Required</th><th>Notes</th></tr>
+  <tr><td>Name</td><td>Yes</td><td>Nepali name. While creating, the slug auto-fills from this name.</td></tr>
+  <tr><td>Name (English)</td><td>No</td><td>Optional English label.</td></tr>
+  <tr><td>Slug</td><td>Yes</td><td>URL piece; editable.</td></tr>
+  <tr><td>Color</td><td>—</td><td>A colour picker (default deep red <code>#c62828</code>). This colour is used for the category’s badge across the site.</td></tr>
+  <tr><td>Sort Order</td><td>—</td><td>A number that controls the display order (lower numbers appear first). Default 0.</td></tr>
+  <tr><td>Active</td><td>—</td><td>Checkbox (on by default). Inactive categories are hidden from the public.</td></tr>
+</table>
+<p>Click <strong>Create Category</strong> (or <strong>Update Category</strong> when editing) to save. A <strong>Cancel</strong> button appears while editing.</p>
+
+<h3>7.2 Category table</h3>
+<p>Columns: Name, Slug, Color (swatch + hex), Sort Order, Articles (count), Status, Actions. Use <strong>Edit</strong> to load a row into the form.</p>
+<div class="warn"><strong>You cannot delete a category that still has articles.</strong> The Delete button is disabled until the article count is 0. Move or delete those articles first, or set the category to Inactive.</div>
+</section>
+
+<!-- ===================== 8. TAGS ===================== -->
+<section class="pg">
+<h2>8. Tags</h2>
+<p class="note">Menu: <strong>ट्यागहरू / Tags</strong> &nbsp;·&nbsp; Access: <span class="role admin">ADMIN</span> <span class="role editor">EDITOR</span></p>
+<p>Tags are free-form keywords (e.g. “election”, “monsoon”) that you attach to articles for cross-topic discovery. An article can have many tags.</p>
+
+<h3>8.1 Adding a tag</h3>
+<ul>
+  <li><strong>नाम (नेपाली) / Name (Nepali):</strong> required.</li>
+  <li><strong>Name (English):</strong> optional.</li>
+  <li>Click <strong>+ थप्नुहोस् (Add)</strong>. The button is disabled until you type a name and shows “थप्दै… (Adding…)” while saving. The slug is generated automatically.</li>
+</ul>
+
+<h3>8.2 Managing tags</h3>
+<p>A header shows the total tag count. The table lists Name, English name, Slug, article count, and actions.</p>
+<ul>
+  <li><strong>सम्पादन (Edit):</strong> Edit the Nepali and English names inline, then <strong>सेभ (Save)</strong> or <strong>रद्द (Cancel)</strong>.</li>
+  <li><strong>मेट्नुहोस् (Delete):</strong> Asks for confirmation, then removes the tag.</li>
+</ul>
+<div class="tip">Tags are assigned to articles from the article editor’s <strong>Tags</strong> checklist. Create the tag here first so it appears there.</div>
+</section>
+
+<!-- ===================== 9. COMMENTS ===================== -->
+<section class="pg">
+<h2>9. Comments Moderation</h2>
+<p class="note">Menu: <strong>टिप्पणीहरू / Comments</strong> &nbsp;·&nbsp; Access: <span class="role admin">ADMIN</span> <span class="role editor">EDITOR</span></p>
+<p>Reader comments arrive as <strong>Pending</strong> and stay hidden from the public until you approve them.</p>
+
+<h3>9.1 Filtering</h3>
+<p>Use the status dropdown — <strong>All / Pending / Approved / Rejected / Spam</strong> — and click <strong>Filter</strong>. The list shows 20 per page.</p>
+
+<h3>9.2 The comment table</h3>
+<p>Columns: Content (truncated), Article it belongs to, User (name or email), Status badge, Date, and Actions.</p>
+<table>
+  <tr><th>Status</th><th>Meaning</th></tr>
+  <tr><td><span class="pill" style="background:#ca8a04">PENDING</span></td><td>Awaiting your review (hidden from public).</td></tr>
+  <tr><td><span class="pill" style="background:#16a34a">APPROVED</span></td><td>Visible under the article.</td></tr>
+  <tr><td><span class="pill" style="background:#dc2626">REJECTED</span></td><td>Hidden / declined.</td></tr>
+  <tr><td><span class="pill" style="background:#6b7280">SPAM</span></td><td>Marked as spam.</td></tr>
+</table>
+
+<h3>9.3 Moderating</h3>
+<ul>
+  <li><strong>Approve</strong> (green): publishes the comment. Hidden when already approved.</li>
+  <li><strong>Reject</strong> (red): hides the comment. Hidden when already rejected.</li>
+  <li>Buttons show “Updating…” briefly while the change saves.</li>
+</ul>
+<div class="tip">The Dashboard’s “Pending comments” number tells you at a glance when there is moderation work waiting.</div>
+</section>
+
+<!-- ===================== 10. MEDIA ===================== -->
+<section class="pg">
+<h2>10. Media Library</h2>
+<p class="note">Menu: <strong>मिडिया / Media</strong> &nbsp;·&nbsp; Access: <span class="role admin">ADMIN</span> <span class="role editor">EDITOR</span> <span class="role author">AUTHOR</span></p>
+<p>A central store for all images, videos, and PDFs used across the site.</p>
+
+<h3>10.1 Adding files</h3>
+<ul>
+  <li><strong>+ Upload File:</strong> Choose a file from your computer (images, videos, or PDF). It uploads and appears in the grid. The button shows “Uploading…”.</li>
+  <li><strong>Add by URL:</strong> Paste an external file URL and click <strong>Add URL</strong>. Invalid URLs are rejected with an “Invalid URL” message.</li>
+</ul>
+
+<h3>10.2 Browsing &amp; searching</h3>
+<p>Files appear as a responsive grid of cards showing a thumbnail (or 🎬 for video / 📄 for documents), the original file name, and file size. Use the <strong>Search</strong> box to find by name. Pagination shows 20 per page.</p>
+
+<h3>10.3 Per-file actions</h3>
+<ul>
+  <li><strong>Edit:</strong> Opens an inline box to set the <em>alt text</em> (important for accessibility and SEO). Save with ✓, cancel with ✕.</li>
+  <li><strong>Del:</strong> Deletes the file after a confirmation prompt.</li>
+</ul>
+<div class="tip">When you click <strong>Upload</strong> on an article’s featured image, an ad image, a reel thumbnail, etc., the file is added to this same Media Library.</div>
+</section>
+
+<!-- ===================== 11. ADS ===================== -->
+<section class="pg">
+<h2>11. Advertisements &amp; Ad Positions</h2>
+<p class="note">Menu: <strong>विज्ञापन / Ads</strong> &nbsp;·&nbsp; Access: <span class="role admin">ADMIN</span> only</p>
+<p>Manage banner advertising. The page has two tabs: <strong>Advertisements</strong> and <strong>Positions</strong>. A stats row shows Total Ads, Active, Positions, total Impressions, and overall CTR (click-through rate).</p>
+
+<h3>11.1 Positions tab — define where ads can appear</h3>
+<p>Create the slots first, then assign ads to them.</p>
+<table>
+  <tr><th>Field</th><th>Notes</th></tr>
+  <tr><td>Position Name</td><td>Required. A handle such as <code>home-header</code>.</td></tr>
+  <tr><td>Type</td><td>HEADER (🔝), SIDEBAR (📐), IN_ARTICLE (📄), BETWEEN_SECTIONS (📊), FOOTER (⬇️), or POPUP (💬).</td></tr>
+  <tr><td>Width / Height</td><td>Optional pixel dimensions of the slot.</td></tr>
+</table>
+<p>Click <strong>+ Add</strong>. Positions show as cards with their type, an active dot, and how many ads are assigned.</p>
+
+<h3>11.2 Advertisements tab — create the ads</h3>
+<table>
+  <tr><th>Field</th><th>Required</th><th>Notes</th></tr>
+  <tr><td>Title</td><td>Yes</td><td>Internal name for the ad.</td></tr>
+  <tr><td>Position</td><td>Yes</td><td>Pick one of the positions you created.</td></tr>
+  <tr><td>Target URL</td><td>Yes</td><td>Where clicks lead.</td></tr>
+  <tr><td>Image</td><td>No</td><td>Paste a URL or click <strong>📤 Upload</strong>. A preview appears.</td></tr>
+  <tr><td>Start / End Date</td><td>No</td><td>Optional scheduling window.</td></tr>
+</table>
+<p>Click <strong>✨ Create Ad</strong>. The ads table shows Title, Position, Preview, Impressions, Clicks, CTR (green if above 2%), Status, and Actions.</p>
+<ul>
+  <li><strong>Status pill</strong> (● Active / ○ Inactive): click it to toggle the ad on/off instantly.</li>
+  <li><strong>Delete:</strong> removes the ad after confirmation.</li>
+</ul>
+</section>
+
+<!-- ===================== 12. SPORTS ===================== -->
+<section class="pg">
+<h2>12. Sports — Tournaments &amp; Matches</h2>
+<p class="note">Menu: <strong>खेलकुद / Sports</strong> &nbsp;·&nbsp; Access: <span class="role admin">ADMIN</span> <span class="role editor">EDITOR</span></p>
+<p>Track tournaments and live match scores. Two tabs: <strong>Tournaments</strong> and <strong>Matches</strong>.</p>
+
+<h3>12.1 Tournaments tab</h3>
+<p>Create with a row of fields: <strong>Name</strong>, <strong>Slug</strong>, and <strong>Sport</strong> (e.g. football, cricket), then <strong>Create</strong>. The table shows each tournament’s name, sport, number of matches, and active status.</p>
+
+<h3>12.2 Matches tab</h3>
+<table>
+  <tr><th>Field</th><th>Notes</th></tr>
+  <tr><td>Tournament</td><td>Required. Pick from your tournaments.</td></tr>
+  <tr><td>Home Team ID / Away Team ID</td><td>Required. Entered as team IDs (see note below).</td></tr>
+  <tr><td>Match date/time</td><td>Required. A date-and-time picker.</td></tr>
+  <tr><td>Venue</td><td>Optional.</td></tr>
+</table>
+<p>Click <strong>Create Match</strong>. In the matches table you can <strong>Edit</strong> a row inline to update the live <strong>score</strong> (two number boxes) and the <strong>status</strong>:</p>
+<table>
+  <tr><th>Status</th><th>Meaning</th></tr>
+  <tr><td><span class="pill" style="background:#2563eb">UPCOMING</span></td><td>Not started.</td></tr>
+  <tr><td><span class="pill" style="background:#dc2626">LIVE</span></td><td>In progress.</td></tr>
+  <tr><td><span class="pill" style="background:#6b7280">COMPLETED</span></td><td>Finished.</td></tr>
+  <tr><td><span class="pill" style="background:#7c4a2d">CANCELLED</span></td><td>Called off.</td></tr>
+</table>
+<p>Save or Cancel your inline edits with the buttons that appear.</p>
+<div class="note"><strong>Note:</strong> This page references teams by their ID; there is no team-creation form here, so teams must already exist in the database.</div>
+</section>
+
+<!-- ===================== 13. REELS ===================== -->
+<section class="pg">
+<h2>13. Reels</h2>
+<p class="note">Menu: <strong>रिल्स / Reels</strong> &nbsp;·&nbsp; Access: <span class="role admin">ADMIN</span> <span class="role editor">EDITOR</span></p>
+<p>Short vertical videos shown in the site’s reels feed.</p>
+<h3>13.1 Create a reel</h3>
+<table>
+  <tr><th>Field</th><th>Required</th><th>Notes</th></tr>
+  <tr><td>Title</td><td>Yes</td><td>Display title.</td></tr>
+  <tr><td>Slug</td><td>Yes</td><td>URL piece.</td></tr>
+  <tr><td>Video URL</td><td>Yes</td><td>Link to the video file/stream.</td></tr>
+  <tr><td>Thumbnail URL</td><td>No</td><td>Paste a URL or click <strong>Upload</strong> to add an image.</td></tr>
+  <tr><td>Description</td><td>No</td><td>Optional caption.</td></tr>
+</table>
+<p>Click <strong>Create Reel</strong>. The table lists Title, Views, Status, Date, and Actions.</p>
+<h3>13.2 Edit / delete</h3>
+<p><strong>Edit</strong> lets you change the title, video URL, thumbnail URL, and status (Active/Inactive) inline, then Save or Cancel. <strong>Delete</strong> removes the reel after confirmation.</p>
+</section>
+
+<!-- ===================== 14. GALLERIES ===================== -->
+<section class="pg">
+<h2>14. Galleries</h2>
+<p class="note">Menu: <strong>ग्यालेरीहरू / Galleries</strong> &nbsp;·&nbsp; Access: <span class="role admin">ADMIN</span> <span class="role editor">EDITOR</span></p>
+<p>Photo galleries (collections of images).</p>
+<h3>14.1 Create a gallery</h3>
+<table>
+  <tr><th>Field</th><th>Required</th><th>Notes</th></tr>
+  <tr><td>Title</td><td>Yes</td><td>Gallery name.</td></tr>
+  <tr><td>Slug</td><td>Yes</td><td>URL piece.</td></tr>
+  <tr><td>Description</td><td>No</td><td>Optional.</td></tr>
+  <tr><td>Cover Image URL</td><td>No</td><td>Paste a URL or click <strong>Upload</strong>.</td></tr>
+</table>
+<p>Click <strong>Create Gallery</strong>. The table shows Title, number of Images, Status, Date, and Actions. <strong>Edit</strong> updates the title and active status; <strong>Delete</strong> removes it after confirmation.</p>
+<div class="note"><strong>Note:</strong> Adding individual photos into a gallery is handled outside this list view; this screen manages the gallery records themselves.</div>
+</section>
+
+<!-- ===================== 15. BREAKING NEWS ===================== -->
+<section class="pg">
+<h2>15. Breaking News</h2>
+<p class="note">Menu: <strong>ब्रेकिङ न्युज / Breaking News</strong> &nbsp;·&nbsp; Access: <span class="role admin">ADMIN</span> <span class="role editor">EDITOR</span></p>
+<p>The scrolling red ticker / alert strip at the top of the site.</p>
+<h3>15.1 Create an item</h3>
+<table>
+  <tr><th>Field</th><th>Required</th><th>Notes</th></tr>
+  <tr><td>Title</td><td>Yes</td><td>The headline text shown in the ticker.</td></tr>
+  <tr><td>Article Link (Article ID)</td><td>No</td><td>Optionally link the ticker to a full article by its ID.</td></tr>
+  <tr><td>Expires At</td><td>No</td><td>Date/time when the item should stop showing. Leave blank for “Never”.</td></tr>
+</table>
+<p>Click <strong>Create</strong>. The form clears and the list refreshes.</p>
+<h3>15.2 Manage items</h3>
+<p>The table shows Title, linked Article, Status, Expiry, Created date, and Actions. Status is computed automatically:</p>
+<ul>
+  <li><span class="pill" style="background:#16a34a">Active</span> — currently showing.</li>
+  <li><span class="pill" style="background:#ca8a04">Inactive</span> — turned off.</li>
+  <li><span class="pill" style="background:#6b7280">Expired</span> — past its expiry time.</li>
+</ul>
+<p><strong>Activate / Deactivate</strong> toggles visibility, <strong>Edit</strong> opens an inline panel (title, article ID, expiry), and <strong>Delete</strong> removes the item after confirmation.</p>
+</section>
+
+<!-- ===================== 16. ANALYTICS ===================== -->
+<section class="pg">
+<h2>16. Analytics</h2>
+<p class="note">Menu: <strong>विश्लेषण / Analytics</strong> &nbsp;·&nbsp; Access: <span class="role admin">ADMIN</span> <span class="role editor">EDITOR</span></p>
+<p>A read-only insights dashboard. There are no inputs to fill — only data and links.</p>
+<ul>
+  <li><strong>KPI cards</strong> with ↑/↓ trend badges: Total Articles, Total Views, Users, and Comments — each links to its section.</li>
+  <li><strong>Page views — last 7 days:</strong> a bar chart with Nepali weekday labels, plus “today’s page views” (trend vs yesterday) and “this month” (trend vs last month) tiles.</li>
+  <li><strong>Article statistics:</strong> published today, this month (with trend), total published, drafts, today’s views, today’s comments.</li>
+  <li><strong>Category breakdown:</strong> coloured bars per category.</li>
+  <li><strong>User growth:</strong> total / today / this week / this month, plus comment-status tiles (approved, pending, today).</li>
+  <li><strong>Top 10 most-viewed articles:</strong> a ranked table (title links to the editor).</li>
+</ul>
+</section>
+
+<!-- ===================== 17. HOLIDAYS ===================== -->
+<section class="pg">
+<h2>17. Holidays (Nepali Calendar)</h2>
+<p class="note">Menu: <strong>बिदाहरू / Holidays</strong> &nbsp;·&nbsp; Access: <span class="role admin">ADMIN</span> <span class="role editor">EDITOR</span></p>
+<p>Feeds the Nepali calendar (Patro) with public and cultural holidays. Entries are stored against both Bikram Sambat (BS) and AD dates.</p>
+<h3>17.1 Add a holiday</h3>
+<p>Click <strong>+ Add Holiday</strong> to reveal the form:</p>
+<table>
+  <tr><th>Field</th><th>Required</th><th>Notes</th></tr>
+  <tr><td>Title (Nepali)</td><td>Yes</td><td>Holiday name.</td></tr>
+  <tr><td>Title (English)</td><td>No</td><td>Optional.</td></tr>
+  <tr><td>BS Year / Month / Day</td><td>Yes</td><td>Bikram Sambat date (year default 2082, month 1–12, day 1–32).</td></tr>
+  <tr><td>AD Date</td><td>Yes</td><td>The Gregorian equivalent date.</td></tr>
+  <tr><td>Type</td><td>—</td><td>On the add form: Public or Cultural. (Editing offers more: public, cultural, restricted, observance.)</td></tr>
+  <tr><td>Public Holiday</td><td>—</td><td>Checkbox, on by default.</td></tr>
+</table>
+<p>Save or Cancel. The table lists Title, BS date, AD date, Type, whether it is public, and Actions (Edit inline / Delete with confirmation).</p>
+</section>
+
+<!-- ===================== 18. GOLD SILVER ===================== -->
+<section class="pg">
+<h2>18. Gold &amp; Silver Prices</h2>
+<p class="note">Menu: <strong>सुन-चाँदी / Gold-Silver</strong> &nbsp;·&nbsp; Access: <span class="role admin">ADMIN</span> <span class="role editor">EDITOR</span></p>
+<p>Daily precious-metal rates shown in the calendar/finance widgets.</p>
+<h3>18.1 Add a price entry</h3>
+<p>Click <strong>+ Add Price</strong>:</p>
+<table>
+  <tr><th>Field</th><th>Required</th><th>Notes</th></tr>
+  <tr><td>Date</td><td>Yes</td><td>The day the rate applies.</td></tr>
+  <tr><td>Fine Gold / tola</td><td>Yes</td><td>Price of fine (24k) gold per tola.</td></tr>
+  <tr><td>Tejabi Gold / tola</td><td>Yes</td><td>Price of tejabi gold per tola.</td></tr>
+  <tr><td>Silver / tola</td><td>Yes</td><td>Silver price per tola.</td></tr>
+  <tr><td>Source</td><td>—</td><td>Defaults to <code>FENEGOSIDA</code>.</td></tr>
+</table>
+<p>The table shows the latest 30 entries by date. Edit any row inline or Delete it (with confirmation).</p>
+</section>
+
+<!-- ===================== 19. FOREX ===================== -->
+<section class="pg">
+<h2>19. Forex Rates</h2>
+<p class="note">Menu: <strong>विनिमय दर / Forex Rates</strong> &nbsp;·&nbsp; Access: <span class="role admin">ADMIN</span> <span class="role editor">EDITOR</span></p>
+<p>Foreign-currency exchange rates (against NPR), grouped by date.</p>
+<h3>19.1 Add a rate</h3>
+<p>Click <strong>+ Add Rate</strong>:</p>
+<table>
+  <tr><th>Field</th><th>Required</th><th>Notes</th></tr>
+  <tr><td>Date</td><td>Yes</td><td>Rate date.</td></tr>
+  <tr><td>Currency Code</td><td>Yes</td><td>e.g. <code>USD</code> (default).</td></tr>
+  <tr><td>Currency Name</td><td>No</td><td>Full name, e.g. US Dollar.</td></tr>
+  <tr><td>Unit</td><td>Yes</td><td>How many units the rate refers to (default 1).</td></tr>
+  <tr><td>Buy Rate NPR</td><td>Yes</td><td>Buying rate in rupees (2 decimals).</td></tr>
+  <tr><td>Sell Rate NPR</td><td>Yes</td><td>Selling rate in rupees (2 decimals).</td></tr>
+</table>
+<p>Rates are listed in per-date cards. Edit inline or Delete (with confirmation). Shows the latest 50 entries.</p>
+</section>
+
+<!-- ===================== 20. RASHIFAL ===================== -->
+<section class="pg">
+<h2>20. Rashifal (Horoscope)</h2>
+<p class="note">Menu: <strong>राशिफल / Rashifal</strong> &nbsp;·&nbsp; Access: <span class="role admin">ADMIN</span> <span class="role editor">EDITOR</span></p>
+<p>Daily horoscope predictions for the 12 zodiac signs (मेष, बृष, मिथुन, कर्कट, सिंह, कन्या, तुला, बृश्चिक, धनु, मकर, कुम्भ, मीन).</p>
+<h3>20.1 Add a prediction</h3>
+<p>Click <strong>+ Add Rashifal</strong>:</p>
+<table>
+  <tr><th>Field</th><th>Required</th><th>Notes</th></tr>
+  <tr><td>Sign</td><td>Yes</td><td>Pick one of the 12 signs from the dropdown.</td></tr>
+  <tr><td>Nepali name</td><td>—</td><td>The Nepali sign label (e.g. मेष).</td></tr>
+  <tr><td>AD Date</td><td>Yes</td><td>The day the prediction applies.</td></tr>
+  <tr><td>Prediction (Nepali)</td><td>Yes</td><td>The horoscope text.</td></tr>
+  <tr><td>Prediction (English)</td><td>No</td><td>Optional translation.</td></tr>
+  <tr><td>Rating</td><td>—</td><td>1–5 “luck” stars (default 3).</td></tr>
+</table>
+<p>The table shows the sign (with emoji), date, a truncated prediction, and a star rating. Edit any row inline or Delete it (with confirmation). Shows the latest 24 entries.</p>
+</section>
+
+<!-- ===================== 21. NEWSLETTER ===================== -->
+<section class="pg">
+<h2>21. Newsletter Subscribers</h2>
+<p class="note">Menu: <strong>सदस्यता / Newsletter</strong> &nbsp;·&nbsp; Access: <span class="role admin">ADMIN</span> only</p>
+<p>A read-only list of people who signed up through the site’s footer newsletter form.</p>
+<ul>
+  <li>Two stat cards: <strong>Total</strong> subscribers and <strong>Active</strong> subscribers.</li>
+  <li><strong>Search box:</strong> find a subscriber by email.</li>
+  <li><strong>Table:</strong> Email, Language, Source (“website” if not set), Status (Active/Inactive), and signup date. 20 per page.</li>
+</ul>
+<div class="note">This page is for reference only — there are no add/edit/delete actions. Subscriptions are created by visitors on the public site.</div>
+</section>
+
+<!-- ===================== 22. USERS ===================== -->
+<section class="pg">
+<h2>22. Users Management</h2>
+<p class="note">Menu: <strong>प्रयोगकर्ता / Users</strong> &nbsp;·&nbsp; Access: <span class="role admin">ADMIN</span> only</p>
+<p>View all accounts and change their roles.</p>
+<ul>
+  <li><strong>Table columns:</strong> Name, Email, Role, Active status, Created date.</li>
+  <li><strong>Role dropdown:</strong> Change a user between READER, AUTHOR, EDITOR, and ADMIN. The change saves immediately and the list refreshes.</li>
+</ul>
+<div class="warn"><strong>You cannot change your own role.</strong> Your own row shows a fixed badge instead of a dropdown, so you can never accidentally demote yourself out of admin access.</div>
+<div class="tip">Promote a trusted writer to <strong>AUTHOR</strong> so they can post articles, or to <strong>EDITOR</strong> to also manage categories, comments, and calendar data. Reserve <strong>ADMIN</strong> for people who should control settings, users, ads, and billing-style data.</div>
+</section>
+
+<!-- ===================== 23. SETTINGS ===================== -->
+<section class="pg">
+<h2>23. Settings</h2>
+<p class="note">Menu: <strong>सेटिङ / Settings</strong> &nbsp;·&nbsp; Access: <span class="role admin">ADMIN</span> only</p>
+<p>Site-wide configuration. Edit any field, then click <strong>Save Settings</strong> at the top (it shows “Saving…”, then a green “Settings saved successfully” message).</p>
+
+<h3>23.1 Branding</h3>
+<ul>
+  <li><strong>Site Name (Nepali / English)</strong> and <strong>Tagline (Nepali / English)</strong>.</li>
+  <li><strong>Logo:</strong> paste a URL or click <strong>Upload</strong>; a live preview is shown.</li>
+  <li><strong>Primary Color:</strong> a colour picker (default <code>#c62828</code>) used as the site’s main accent.</li>
+</ul>
+<h3>23.2 Contact Information</h3>
+<p>Phone, Email, and Address (Nepali &amp; English).</p>
+<h3>23.3 Social Media</h3>
+<p>URLs for Facebook, Twitter/X, YouTube, Instagram, and TikTok.</p>
+<h3>23.4 Feature Toggles</h3>
+<p>Checkboxes to turn site features on or off globally: <strong>Comments</strong>, <strong>Bookmarks</strong>, <strong>Reels</strong>, and <strong>Galleries</strong>.</p>
+<div class="warn">Turning off a feature (e.g. Comments) hides it across the whole public site. Double-check before saving.</div>
+</section>
+
+<!-- ===================== 24. AUDIT LOG ===================== -->
+<section class="pg">
+<h2>24. Audit Log</h2>
+<p class="note">Menu: <strong>अडिट लग / Audit Log</strong> &nbsp;·&nbsp; Access: <span class="role admin">ADMIN</span> only</p>
+<p>A read-only security trail of important admin actions — useful for accountability and investigating changes.</p>
+<ul>
+  <li><strong>Search:</strong> by admin name or affected entity.</li>
+  <li><strong>Action filter:</strong> All / Create / Update / Delete / Publish / Settings Change.</li>
+  <li><strong>Table columns:</strong> Admin (who), Action (colour-coded badge), Entity (what was affected), Entity ID, and Timestamp. 30 entries per page.</li>
+</ul>
+<table class="nobreak">
+  <tr><th>Action badge</th><th>Colour</th></tr>
+  <tr><td>CREATE</td><td>Green</td></tr>
+  <tr><td>UPDATE</td><td>Blue</td></tr>
+  <tr><td>DELETE</td><td>Red</td></tr>
+  <tr><td>PUBLISH</td><td>Purple</td></tr>
+  <tr><td>SETTINGS_CHANGE</td><td>Amber</td></tr>
+</table>
+</section>
+
+<!-- ===================== 25. CONVENTIONS ===================== -->
+<section class="pg">
+<h2>25. Common Conventions &amp; Quick Reference</h2>
+<h3>25.1 Conventions used everywhere</h3>
+<ul>
+  <li><strong>Required fields</strong> are marked with <code>*</code> or enforced by the browser — you cannot save without them.</li>
+  <li><strong>Slugs</strong> (URL pieces) auto-generate from the title and accept both Nepali (Devanagari) and English characters; you can always edit them.</li>
+  <li><strong>Image uploads</strong> everywhere use the same Media Library — click any <strong>Upload</strong> button to pick a file; the resulting URL fills in automatically.</li>
+  <li><strong>Status pills:</strong> green = Active/Published, gray = Inactive/Draft, amber = Archived/Inactive, red = Live/Rejected depending on context.</li>
+  <li><strong>Deletes</strong> always ask for confirmation in a browser pop-up and are usually permanent.</li>
+  <li><strong>Bilingual data:</strong> Articles, categories, and tags have Nepali + English fields; calendar data stores both BS and AD dates.</li>
+</ul>
+
+<h3>25.2 Status colour legend</h3>
+<table class="nobreak">
+  <tr><th>Pill</th><th>Used for</th></tr>
+  <tr><td><span class="pill" style="background:#16a34a">Green</span></td><td>Active, Published, Approved</td></tr>
+  <tr><td><span class="pill" style="background:#6b7280">Gray</span></td><td>Inactive, Draft, Spam</td></tr>
+  <tr><td><span class="pill" style="background:#ca8a04">Amber</span></td><td>Archived, Pending, Expired</td></tr>
+  <tr><td><span class="pill" style="background:#dc2626">Red</span></td><td>Rejected, Live match, Delete actions</td></tr>
+</table>
+
+<h3>25.3 Typical workflows at a glance</h3>
+<ol>
+  <li><strong>Publish a news story:</strong> Articles → + New Article → fill Title/Content → pick Category &amp; Tags → set Featured Image → Status = Published → Create Article.</li>
+  <li><strong>Run a banner ad:</strong> Ads → Positions tab → create a position → Advertisements tab → create the ad pointing at that position → toggle it Active.</li>
+  <li><strong>Update daily rates:</strong> Gold-Silver / Forex → + Add → enter today’s date and figures → Save.</li>
+  <li><strong>Moderate community:</strong> Comments → filter Pending → Approve or Reject each.</li>
+  <li><strong>Onboard a writer:</strong> Users → set their role to Author (or Editor) → they sign in at <code>/admin</code>.</li>
+</ol>
+</section>
+
+<!-- ===================== 26. TROUBLESHOOTING ===================== -->
+<section class="pg">
+<h2>26. Troubleshooting &amp; FAQ</h2>
+<table>
+  <tr><th>Problem</th><th>What to check</th></tr>
+  <tr><td>I open <code>/admin</code> and get sent to the homepage.</td><td>Your account role is READER. Ask an Admin to raise your role to Author/Editor/Admin in Users.</td></tr>
+  <tr><td>I open <code>/admin</code> and get sent to the login page.</td><td>You are signed out. Log in again.</td></tr>
+  <tr><td>A menu item is missing.</td><td>Your role does not include that section (see Section 2). For example, Authors only see Dashboard, Articles, and Media.</td></tr>
+  <tr><td>I cannot delete a category.</td><td>It still contains articles. The Delete button is disabled until the article count is 0. Reassign or delete those articles first.</td></tr>
+  <tr><td>My new article is not visible on the site.</td><td>Its status is probably Draft. Open it and set Status to Published, then Save.</td></tr>
+  <tr><td>A comment is not showing publicly.</td><td>It is Pending or Rejected. Approve it in Comments.</td></tr>
+  <tr><td>Breaking-news ticker disappeared.</td><td>It may have passed its Expiry time (shows “Expired”) or been Deactivated.</td></tr>
+  <tr><td>The “Upload” button did nothing.</td><td>Check the file type (images/video/PDF) and your connection; the button shows “Uploading…” while working.</td></tr>
+  <tr><td>I changed my own role and it didn’t work.</td><td>By design — Admins cannot change their own role. Ask another Admin.</td></tr>
+  <tr><td>I forgot my password.</td><td>Use <strong>Forgot password?</strong> on the login screen to receive a reset email.</td></tr>
+</table>
+
+<div class="note" style="margin-top:24px;">
+<strong>End of manual.</strong> NamasteExpress (नमस्ते एक्सप्रेस) Admin Panel User Manual, Version 1.0. Keep this document handy for new team members and refer to the Audit Log for a record of all administrative changes.
+</div>
+</section>
+
+</body>
+</html>

@@ -1,0 +1,72 @@
+# Dependencies and package-manager caches
+/node_modules/
+/.pnp/
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Next.js, TypeScript, tests, and build output
+/.next/
+/out/
+/build/
+/dist/
+/coverage/
+*.tsbuildinfo
+next-env.d.ts
+
+# Environment files and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+*.sql.gz
+
+# Runtime uploads and logs
+/public/uploads/
+*.log
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Local tooling, generated reports, and temporary artifacts
+/.venv/
+/.worktrees/
+/.kilo/
+/.kiro/
+/.mimocode/
+/.vscode/
+/audit-reports/
+/deploy-staging/
+/dogfood-output/
+/output/
+/screenshots/
+/tmp/
+/plugins/
+/output.txt
+/kilo.json
+
+# Platform and IDE metadata
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+*.swp
+*.swo
+
+# Hosting platform state
+.vercel/

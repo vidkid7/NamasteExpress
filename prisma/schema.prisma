@@ -1,0 +1,657 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ────────────────────────────────────────────
+
+enum UserRole {
+  ADMIN
+  EDITOR
+  AUTHOR
+  READER
+}
+
+enum ArticleStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum CommentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SPAM
+}
+
+enum MatchStatus {
+  UPCOMING
+  LIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum AdPositionType {
+  HEADER
+  SIDEBAR
+  IN_ARTICLE
+  FOOTER
+  BETWEEN_SECTIONS
+  POPUP
+}
+
+// ─── User & Auth ────────────────────────────────────────
+
+model User {
+  id              String    @id @default(cuid())
+  name            String?
+  email           String    @unique
+  emailVerified   DateTime? @map("email_verified")
+  password_hash   String?
+  image           String?
+  role            UserRole  @default(READER)
+  theme           String    @default("light")
+  admin_theme     String    @default("light")
+  language        String    @default("ne")
+  is_active       Boolean   @default(true)
+  failed_login_count Int    @default(0)
+  locked_until    DateTime? @db.Timestamptz
+  last_failed_login_at DateTime? @db.Timestamptz
+  session_version Int       @default(0)
+  totp_secret     String?
+  totp_enabled    Boolean   @default(false)
+  created_at      DateTime  @default(now()) @db.Timestamptz
+  updated_at      DateTime  @updatedAt @db.Timestamptz
+
+  accounts              Account[]
+  sessions              Session[]
+  articles              Article[]
+  comments              Comment[]
+  comment_votes         CommentVote[]
+  bookmarks             Bookmark[]
+  media_files           MediaFile[]
+  audit_logs            AuditLog[]
+  password_reset_tokens PasswordResetToken[]
+  email_verify_tokens   EmailVerificationToken[]
+  page_views            PageView[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model PasswordResetToken {
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  token_hash String
+  expires_at DateTime @db.Timestamptz
+  used       Boolean  @default(false)
+  created_at DateTime @default(now()) @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
+}
+
+model EmailVerificationToken {
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  token_hash String
+  expires_at DateTime @db.Timestamptz
+  used       Boolean  @default(false)
+  created_at DateTime @default(now()) @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("email_verification_tokens")
+}
+
+// ─── Content ────────────────────────────────────────────
+
+model Category {
+  id          String     @id @default(cuid())
+  name        String
+  name_en     String?
+  slug        String     @unique
+  description String?
+  color       String     @default("#c62828")
+  sort_order  Int        @default(0)
+  parent_id   String?
+  is_active   Boolean    @default(true)
+  created_at  DateTime   @default(now()) @db.Timestamptz
+  updated_at  DateTime   @updatedAt @db.Timestamptz
+
+  parent   Category?  @relation("CategoryTree", fields: [parent_id], references: [id])
+  children Category[] @relation("CategoryTree")
+  articles Article[]
+  web_stories WebStory[]
+
+  @@map("categories")
+}
+
+model Tag {
+  id         String   @id @default(cuid())
+  name       String
+  name_en    String?
+  slug       String   @unique
+  created_at DateTime @default(now()) @db.Timestamptz
+
+  articles ArticleTag[]
+
+  @@map("tags")
+}
+
+model Article {
+  id             String        @id @default(cuid())
+  title          String
+  title_en       String?
+  slug           String        @unique
+  excerpt        String?
+  excerpt_en     String?
+  content        String        @db.Text
+  content_en     String?       @db.Text
+  featured_image String?
+  ai_summary     String?       @db.Text
+  status         ArticleStatus @default(DRAFT)
+  is_featured    Boolean       @default(false)
+  reading_time   Int?
+  word_count     Int?
+  view_count     Int           @default(0)
+  comment_count  Int           @default(0)
+  published_at   DateTime?     @db.Timestamptz
+  category_id    String
+  author_id      String
+  created_at     DateTime      @default(now()) @db.Timestamptz
+  updated_at     DateTime      @updatedAt @db.Timestamptz
+
+  category      Category       @relation(fields: [category_id], references: [id])
+  author        User           @relation(fields: [author_id], references: [id])
+  tags          ArticleTag[]
+  comments      Comment[]
+  bookmarks     Bookmark[]
+  breaking_news BreakingNews[]
+  page_views    PageView[]
+
+  @@index([category_id])
+  @@index([author_id])
+  @@index([published_at])
+  @@index([status])
+  @@index([is_featured])
+  @@index([status, published_at])
+  @@map("articles")
+}
+
+model ArticleTag {
+  article_id String
+  tag_id     String
+
+  article Article @relation(fields: [article_id], references: [id], onDelete: Cascade)
+  tag     Tag     @relation(fields: [tag_id], references: [id], onDelete: Cascade)
+
+  @@id([article_id, tag_id])
+  @@map("article_tags")
+}
+
+// ─── Comments ───────────────────────────────────────────
+
+model Comment {
+  id         String        @id @default(cuid())
+  content    String        @db.Text
+  status     CommentStatus @default(PENDING)
+  article_id String
+  user_id    String
+  parent_id  String?
+  like_count Int           @default(0)
+  dislike_count Int        @default(0)
+  created_at DateTime      @default(now()) @db.Timestamptz
+  updated_at DateTime      @updatedAt @db.Timestamptz
+
+  article  Article       @relation(fields: [article_id], references: [id], onDelete: Cascade)
+  user     User          @relation(fields: [user_id], references: [id])
+  parent   Comment?      @relation("CommentTree", fields: [parent_id], references: [id])
+  children Comment[]     @relation("CommentTree")
+  votes    CommentVote[]
+
+  @@index([article_id])
+  @@index([user_id])
+  @@index([status])
+  @@map("comments")
+}
+
+model CommentVote {
+  id         String   @id @default(cuid())
+  comment_id String
+  user_id    String
+  is_like    Boolean
+  created_at DateTime @default(now()) @db.Timestamptz
+
+  comment Comment @relation(fields: [comment_id], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [user_id], references: [id])
+
+  @@unique([comment_id, user_id])
+  @@map("comment_votes")
+}
+
+// ─── Bookmarks ──────────────────────────────────────────
+
+model Bookmark {
+  id         String   @id @default(cuid())
+  user_id    String
+  article_id String
+  created_at DateTime @default(now()) @db.Timestamptz
+
+  user    User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  article Article @relation(fields: [article_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, article_id])
+  @@map("bookmarks")
+}
+
+// ─── Media ──────────────────────────────────────────────
+
+model MediaFile {
+  id           String   @id @default(cuid())
+  filename     String
+  original_name String
+  mime_type    String
+  size         Int
+  url          String
+  alt_text     String?
+  width        Int?
+  height       Int?
+  variants     Json?
+  uploaded_by  String
+  created_at   DateTime @default(now()) @db.Timestamptz
+
+  uploader User @relation(fields: [uploaded_by], references: [id])
+
+  @@index([uploaded_by])
+  @@index([created_at])
+  @@map("media_files")
+}
+
+// ─── Sports ─────────────────────────────────────────────
+
+model Tournament {
+  id         String   @id @default(cuid())
+  name       String
+  name_en    String?
+  slug       String   @unique
+  sport_type String
+  is_active  Boolean  @default(true)
+  start_date DateTime? @db.Timestamptz
+  end_date   DateTime? @db.Timestamptz
+  created_at DateTime @default(now()) @db.Timestamptz
+
+  matches Match[]
+
+  @@map("tournaments")
+}
+
+model Team {
+  id         String   @id @default(cuid())
+  name       String
+  name_en    String?
+  logo       String?
+  created_at DateTime @default(now()) @db.Timestamptz
+
+  home_matches Match[] @relation("HomeTeam")
+  away_matches Match[] @relation("AwayTeam")
+
+  @@map("teams")
+}
+
+model Match {
+  id            String      @id @default(cuid())
+  tournament_id String
+  home_team_id  String
+  away_team_id  String
+  home_score    Int?
+  away_score    Int?
+  status        MatchStatus @default(UPCOMING)
+  match_date    DateTime    @db.Timestamptz
+  venue         String?
+  created_at    DateTime    @default(now()) @db.Timestamptz
+  updated_at    DateTime    @updatedAt @db.Timestamptz
+
+  tournament Tournament @relation(fields: [tournament_id], references: [id])
+  home_team  Team       @relation("HomeTeam", fields: [home_team_id], references: [id])
+  away_team  Team       @relation("AwayTeam", fields: [away_team_id], references: [id])
+
+  @@map("matches")
+}
+
+// ─── Reels ──────────────────────────────────────────────
+
+model Reel {
+  id          String   @id @default(cuid())
+  title       String
+  title_en    String?
+  slug        String   @unique
+  video_url   String
+  thumbnail   String?
+  description String?
+  view_count  Int      @default(0)
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now()) @db.Timestamptz
+  updated_at  DateTime @updatedAt @db.Timestamptz
+
+  @@map("reels")
+}
+
+// ─── Gallery ────────────────────────────────────────────
+
+model Gallery {
+  id          String   @id @default(cuid())
+  title       String
+  title_en    String?
+  slug        String   @unique
+  description String?
+  cover_image String?
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now()) @db.Timestamptz
+  updated_at  DateTime @updatedAt @db.Timestamptz
+
+  images GalleryImage[]
+
+  @@map("galleries")
+}
+
+model GalleryImage {
+  id         String   @id @default(cuid())
+  gallery_id String
+  url        String
+  caption    String?
+  caption_en String?
+  sort_order Int      @default(0)
+  created_at DateTime @default(now()) @db.Timestamptz
+
+  gallery Gallery @relation(fields: [gallery_id], references: [id], onDelete: Cascade)
+
+  @@map("gallery_images")
+}
+
+// ─── Advertisements ─────────────────────────────────────
+
+model AdPosition {
+  id         String         @id @default(cuid())
+  name       String         @unique
+  type       AdPositionType
+  width      Int?
+  height     Int?
+  is_active  Boolean        @default(true)
+  created_at DateTime       @default(now()) @db.Timestamptz
+
+  advertisements Advertisement[]
+
+  @@map("ad_positions")
+}
+
+model Advertisement {
+  id             String    @id @default(cuid())
+  title          String
+  image_url      String?
+  target_url     String
+  position_id    String
+  impressions    Int       @default(0)
+  clicks         Int       @default(0)
+  is_active      Boolean   @default(true)
+  start_date     DateTime? @db.Timestamptz
+  end_date       DateTime? @db.Timestamptz
+  created_at     DateTime  @default(now()) @db.Timestamptz
+  updated_at     DateTime  @updatedAt @db.Timestamptz
+
+  position AdPosition @relation(fields: [position_id], references: [id])
+
+  @@index([position_id])
+  @@index([is_active])
+  @@index([start_date, end_date])
+  @@map("advertisements")
+}
+
+// ─── Breaking News ──────────────────────────────────────
+
+model BreakingNews {
+  id         String    @id @default(cuid())
+  title      String
+  title_en   String?
+  article_id String?
+  is_active  Boolean   @default(true)
+  expires_at DateTime? @db.Timestamptz
+  created_at DateTime  @default(now()) @db.Timestamptz
+
+  article Article? @relation(fields: [article_id], references: [id])
+
+  @@index([is_active])
+  @@map("breaking_news")
+}
+
+// ─── Web Stories ────────────────────────────────────────
+
+model WebStory {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  slides      Json
+  category_id String?
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now()) @db.Timestamptz
+  updated_at  DateTime @updatedAt @db.Timestamptz
+
+  category Category? @relation(fields: [category_id], references: [id])
+
+  @@map("web_stories")
+}
+
+// ─── Analytics ──────────────────────────────────────────
+
+model PageView {
+  id         String   @id @default(cuid())
+  page_url   String
+  article_id String?
+  user_id    String?
+  ip_address String?
+  user_agent String?
+  referrer   String?
+  created_at DateTime @default(now()) @db.Timestamptz
+
+  article Article? @relation(fields: [article_id], references: [id])
+  user    User?    @relation(fields: [user_id], references: [id])
+
+  @@index([article_id])
+  @@index([user_id])
+  @@index([created_at])
+  @@index([page_url])
+  @@map("page_views")
+}
+
+// ─── Site Settings ──────────────────────────────────────
+
+model SiteSettings {
+  id    String @id @default(cuid())
+  key   String @unique
+  value Json
+  updated_at DateTime @updatedAt @db.Timestamptz
+
+  @@map("site_settings")
+}
+
+model NewsletterSubscription {
+  id         String   @id @default(cuid())
+  email      String   @unique
+  language   String   @default("ne")
+  source     String?
+  is_active  Boolean  @default(true)
+  created_at DateTime @default(now()) @db.Timestamptz
+  updated_at DateTime @updatedAt @db.Timestamptz
+
+  @@index([is_active])
+  @@index([created_at])
+  @@map("newsletter_subscriptions")
+}
+
+// ─── Audit Log ──────────────────────────────────────────
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  admin_id   String
+  action     String
+  entity     String
+  entity_id  String?
+  old_value  Json?
+  new_value  Json?
+  ip_address String?
+  created_at DateTime @default(now()) @db.Timestamptz
+
+  admin User @relation(fields: [admin_id], references: [id])
+
+  @@index([admin_id])
+  @@index([entity])
+  @@index([created_at])
+  @@map("audit_logs")
+}
+
+// ─── Calendar: Holidays & Events ────────────────────────
+
+model Holiday {
+  id          String   @id @default(cuid())
+  title       String
+  title_en    String?
+  bs_year     Int
+  bs_month    Int
+  bs_day      Int
+  ad_date     DateTime @db.Date
+  type        String   @default("public") // public | cultural | restricted | observance
+  is_public   Boolean  @default(true)
+  description String?
+  description_en String?
+  created_at  DateTime @default(now()) @db.Timestamptz
+
+  @@unique([bs_year, bs_month, bs_day, title])
+  @@index([bs_year, bs_month])
+  @@index([ad_date])
+  @@index([type])
+  @@map("holidays")
+}
+
+// ─── Calendar: Panchang (Daily) ─────────────────────────
+
+model PanchangData {
+  id          String   @id @default(cuid())
+  bs_year     Int
+  bs_month    Int
+  bs_day      Int
+  ad_date     DateTime @db.Date
+  tithi       String?
+  nakshatra   String?
+  yoga        String?
+  karana      String?
+  sunrise     String?
+  sunset      String?
+  moonrise    String?
+  rahukaal    String?
+  created_at  DateTime @default(now()) @db.Timestamptz
+
+  @@unique([bs_year, bs_month, bs_day])
+  @@index([ad_date])
+  @@map("panchang_data")
+}
+
+// ─── Finance: Gold & Silver Prices ──────────────────────
+
+model GoldSilverPrice {
+  id              String   @id @default(cuid())
+  date            DateTime @db.Date
+  fine_gold       Float?   // hallmark gold per tola
+  tejabi_gold     Float?   // tejabi gold per tola
+  silver          Float?   // silver per tola
+  source          String?
+  created_at      DateTime @default(now()) @db.Timestamptz
+
+  @@unique([date])
+  @@index([date])
+  @@map("gold_silver_prices")
+}
+
+// ─── Finance: Forex Rates ───────────────────────────────
+
+model ForexRate {
+  id           String   @id @default(cuid())
+  date         DateTime @db.Date
+  currency     String   // e.g. "USD", "EUR", "GBP"
+  currency_name String?  // e.g. "US Dollar"
+  buy          Float?
+  sell         Float?
+  unit         Int      @default(1)
+  source       String?
+  created_at   DateTime @default(now()) @db.Timestamptz
+
+  @@unique([date, currency])
+  @@index([date])
+  @@index([currency])
+  @@map("forex_rates")
+}
+
+// ─── Rashifal (Daily Horoscope) ─────────────────────────
+
+model Rashifal {
+  id          String   @id @default(cuid())
+  bs_year     Int
+  bs_month    Int
+  bs_day      Int
+  ad_date     DateTime @db.Date
+  sign        String   // e.g. "mesh", "brish", etc.
+  sign_ne     String?  // e.g. "मेष"
+  prediction  String   @db.Text
+  prediction_en String? @db.Text
+  rating      Int?     @default(3) // 1-5 stars
+  created_at  DateTime @default(now()) @db.Timestamptz
+
+  @@unique([bs_year, bs_month, bs_day, sign])
+  @@index([ad_date])
+  @@index([sign])
+  @@map("rashifal")
+}
