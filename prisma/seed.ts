@@ -572,18 +572,12 @@ async function main() {
     const [slug, articleId] = articleList[index];
     const tag = tags[tagSlugs[index % tagSlugs.length]];
     if (!tag) continue;
-    await prisma.articleTag.upsert({
-      where: { article_id_tag_id: { article_id: articleId, tag_id: tag.id } },
-      update: {},
-      create: { article_id: articleId, tag_id: tag.id },
-    });
+    const existingArticleTag = await prisma.articleTag.findFirst({ where: { article_id: articleId, tag_id: tag.id }, select: { article_id: true } });
+    if (!existingArticleTag) await prisma.articleTag.create({ data: { article_id: articleId, tag_id: tag.id } });
     if (index % 3 === 0) {
       const secondTag = tags[tagSlugs[(index + 3) % tagSlugs.length]];
-      await prisma.articleTag.upsert({
-        where: { article_id_tag_id: { article_id: articleId, tag_id: secondTag.id } },
-        update: {},
-        create: { article_id: articleId, tag_id: secondTag.id },
-      });
+      const existingSecondTag = await prisma.articleTag.findFirst({ where: { article_id: articleId, tag_id: secondTag.id }, select: { article_id: true } });
+      if (!existingSecondTag) await prisma.articleTag.create({ data: { article_id: articleId, tag_id: secondTag.id } });
     }
     void slug;
   }
@@ -623,18 +617,17 @@ async function main() {
   for (let index = 0; index < seededComments.length; index++) {
     const comment = seededComments[index];
     const voter = readers[(index + 1) % readers.length];
-    await prisma.commentVote.upsert({
-      where: { comment_id_user_id: { comment_id: comment.id, user_id: voter.id } },
-      update: { is_like: index % 2 === 0 },
-      create: { id: `seed-vote-${index + 1}`, comment_id: comment.id, user_id: voter.id, is_like: index % 2 === 0 },
-    });
+    const existingVote = await prisma.commentVote.findFirst({ where: { comment_id: comment.id, user_id: voter.id }, select: { id: true } });
+    if (existingVote) {
+      await prisma.commentVote.update({ where: { id: existingVote.id }, data: { is_like: index % 2 === 0 } });
+    } else {
+      await prisma.commentVote.create({ data: { id: `seed-vote-${index + 1}`, comment_id: comment.id, user_id: voter.id, is_like: index % 2 === 0 } });
+    }
   }
   for (let index = 0; index < Math.min(4, articleList.length); index++) {
-    await prisma.bookmark.upsert({
-      where: { user_id_article_id: { user_id: readers[index % readers.length].id, article_id: articleList[index][1] } },
-      update: {},
-      create: { id: `seed-bookmark-${index + 1}`, user_id: readers[index % readers.length].id, article_id: articleList[index][1] },
-    });
+    const bookmarkData = { user_id: readers[index % readers.length].id, article_id: articleList[index][1] };
+    const existingBookmark = await prisma.bookmark.findFirst({ where: bookmarkData, select: { id: true } });
+    if (!existingBookmark) await prisma.bookmark.create({ data: { id: `seed-bookmark-${index + 1}`, ...bookmarkData } });
   }
 
   for (let index = 0; index < 40; index++) {
@@ -646,11 +639,12 @@ async function main() {
   }
   const newsletterEmails = ["demo.reader1@example.com", "demo.reader2@example.com", "demo.reader3@example.com", "demo.reader4@example.com"];
   for (const email of newsletterEmails) {
-    await prisma.newsletterSubscription.upsert({
-      where: { email },
-      update: { is_active: true, source: "seed" },
-      create: { email, language: "ne", source: "seed", is_active: true },
-    });
+    const existingNewsletter = await prisma.newsletterSubscription.findFirst({ where: { email }, select: { id: true } });
+    if (existingNewsletter) {
+      await prisma.newsletterSubscription.update({ where: { id: existingNewsletter.id }, data: { is_active: true, source: "seed" } });
+    } else {
+      await prisma.newsletterSubscription.create({ data: { email, language: "ne", source: "seed", is_active: true } });
+    }
   }
   const existingSeedAudit = await prisma.auditLog.findUnique({ where: { id: "seed-audit-1" }, select: { id: true } });
   if (existingSeedAudit) {
