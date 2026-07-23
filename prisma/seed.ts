@@ -1,10 +1,10 @@
-import { PrismaClient, UserRole, ArticleStatus, CommentStatus, MatchStatus } from "@prisma/client";
+import { UserRole, ArticleStatus, CommentStatus, MatchStatus } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { prisma } from "../src/lib/prisma";
 import { createSeedClock } from "./seed-data/seed-date";
 import { validateSeedFixtures } from "./seed-data/validate-fixtures";
 import { verifiedSnapshots } from "./seed-data/verified-snapshots";
 
-const prisma = new PrismaClient();
 const seedClock = createSeedClock(process.env.SEED_DATE);
 
 function hoursAgo(h: number) { return seedClock.hoursAgo(h); }

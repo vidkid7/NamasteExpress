@@ -1,9 +1,7 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { afterAll, describe, expect, it } from "vitest";
 import { createSeedClock } from "../../prisma/seed-data/seed-date";
 import { verifySeed } from "../../prisma/seed-data/seed-runner";
-
-const prisma = new PrismaClient();
 
 describe("verifySeed", () => {
   afterAll(() => prisma.$disconnect());

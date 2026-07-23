@@ -5,9 +5,8 @@ if (process.env.NODE_ENV === "production") {
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import fc from "fast-check";
 import bcrypt from "bcryptjs";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
-const prisma = new PrismaClient();
 const TEST_PREFIX = "test-auth-sess";
 
 let testUserId: string;

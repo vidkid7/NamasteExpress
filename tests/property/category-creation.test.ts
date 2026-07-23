@@ -4,9 +4,8 @@ if (process.env.NODE_ENV === "production") {
 
 import { describe, it, expect, afterAll } from "vitest";
 import fc from "fast-check";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
-const prisma = new PrismaClient();
 const TEST_PREFIX = "test-cat-create";
 
 afterAll(async () => {

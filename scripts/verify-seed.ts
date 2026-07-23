@@ -1,8 +1,6 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../src/lib/prisma";
 import { createSeedClock } from "../prisma/seed-data/seed-date";
 import { verifySeed } from "../prisma/seed-data/seed-runner";
-
-const prisma = new PrismaClient();
 
 verifySeed(prisma, createSeedClock(process.env.SEED_DATE))
   .then((summary) => {
