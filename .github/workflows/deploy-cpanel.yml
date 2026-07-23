@@ -30,6 +30,9 @@ jobs:
       - name: Run tests
         run: npm test
 
+      - name: Build production application
+        run: npm run build
+
       - name: Configure SSH
         env:
           CPANEL_SSH_PRIVATE_KEY: ${{ secrets.CPANEL_SSH_PRIVATE_KEY }}
@@ -50,18 +53,17 @@ jobs:
           rsync -az --delete \
             --exclude='.git/' \
             --exclude='node_modules/' \
-            --exclude='.next/' \
             --exclude='.env' \
             --exclude='.env.*' \
             --exclude='public/uploads/' \
             -e "ssh -i $HOME/.ssh/namastexpress_deploy -p $CPANEL_SSH_PORT" \
             ./ "$CPANEL_SSH_USER@$CPANEL_SSH_HOST:/home/subhakam/namastexpress/"
 
-      - name: Install, migrate, build, and restart
+      - name: Install production dependencies and restart
         env:
           CPANEL_SSH_HOST: ${{ secrets.CPANEL_SSH_HOST }}
           CPANEL_SSH_PORT: ${{ secrets.CPANEL_SSH_PORT }}
           CPANEL_SSH_USER: ${{ secrets.CPANEL_SSH_USER }}
         run: |
           ssh -i "$HOME/.ssh/namastexpress_deploy" -p "$CPANEL_SSH_PORT" "$CPANEL_SSH_USER@$CPANEL_SSH_HOST" \
-            'cd /home/subhakam/namastexpress && npm ci && npx prisma migrate deploy && npm run build && mkdir -p tmp && touch tmp/restart.txt'
+            'source /home/subhakam/nodevenv/namastexpress/20/bin/activate && cd /home/subhakam/namastexpress && npm ci --omit=dev && mkdir -p tmp && touch tmp/restart.txt'
