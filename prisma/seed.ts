@@ -652,11 +652,17 @@ async function main() {
       create: { email, language: "ne", source: "seed", is_active: true },
     });
   }
-  await prisma.auditLog.upsert({
-    where: { id: "seed-audit-1" },
-    update: { action: "SEED_REFRESH", entity: "seed", new_value: { seed_date: seedClock.isoDate } },
-    create: { id: "seed-audit-1", admin_id: admin.id, action: "SEED_REFRESH", entity: "seed", new_value: { seed_date: seedClock.isoDate }, ip_address: "127.0.0.1" },
-  });
+  const existingSeedAudit = await prisma.auditLog.findUnique({ where: { id: "seed-audit-1" }, select: { id: true } });
+  if (existingSeedAudit) {
+    await prisma.auditLog.update({
+      where: { id: existingSeedAudit.id },
+      data: { action: "SEED_REFRESH", entity: "seed", new_value: { seed_date: seedClock.isoDate } },
+    });
+  } else {
+    await prisma.auditLog.create({
+      data: { id: "seed-audit-1", admin_id: admin.id, action: "SEED_REFRESH", entity: "seed", new_value: { seed_date: seedClock.isoDate }, ip_address: "127.0.0.1" },
+    });
+  }
 
   const panchang = {
     bs_year: 2083,
@@ -682,11 +688,13 @@ async function main() {
     await prisma.panchangData.create({ data: panchang });
   }
 
-  await prisma.siteSettings.upsert({
-    where: { key: "seed_dataset_info" },
-    update: { value: { mode: "development", seed_date: seedClock.isoDate, verified_sources: [verifiedSnapshots.forex.sourceUrl, verifiedSnapshots.goldSilver.sourceUrl, verifiedSnapshots.holidays.sourceUrl], editorial_content: "DEMO" } },
-    create: { key: "seed_dataset_info", value: { mode: "development", seed_date: seedClock.isoDate, verified_sources: [verifiedSnapshots.forex.sourceUrl, verifiedSnapshots.goldSilver.sourceUrl, verifiedSnapshots.holidays.sourceUrl], editorial_content: "DEMO" } },
-  });
+  const seedDatasetInfo = { mode: "development", seed_date: seedClock.isoDate, verified_sources: [verifiedSnapshots.forex.sourceUrl, verifiedSnapshots.goldSilver.sourceUrl, verifiedSnapshots.holidays.sourceUrl], editorial_content: "DEMO" };
+  const existingSeedSettings = await prisma.siteSettings.findFirst({ where: { key: "seed_dataset_info" }, select: { id: true } });
+  if (existingSeedSettings) {
+    await prisma.siteSettings.update({ where: { id: existingSeedSettings.id }, data: { value: seedDatasetInfo } });
+  } else {
+    await prisma.siteSettings.create({ data: { key: "seed_dataset_info", value: seedDatasetInfo } });
+  }
   console.log("   ✅ Relationships, media, stories, and analytics seeded");
 
   console.log("\n✅ All done!");
