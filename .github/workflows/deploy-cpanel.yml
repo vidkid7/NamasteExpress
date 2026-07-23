@@ -1,0 +1,67 @@
+name: Deploy NamasteExpress to cPanel
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: namastexpress-production
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.19.4
+          cache: npm
+
+      - name: Verify dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Configure SSH
+        env:
+          CPANEL_SSH_PRIVATE_KEY: ${{ secrets.CPANEL_SSH_PRIVATE_KEY }}
+          CPANEL_SSH_HOST: ${{ secrets.CPANEL_SSH_HOST }}
+          CPANEL_SSH_PORT: ${{ secrets.CPANEL_SSH_PORT }}
+        run: |
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$CPANEL_SSH_PRIVATE_KEY" > "$HOME/.ssh/namastexpress_deploy"
+          chmod 600 "$HOME/.ssh/namastexpress_deploy"
+          ssh-keyscan -p "$CPANEL_SSH_PORT" "$CPANEL_SSH_HOST" >> "$HOME/.ssh/known_hosts"
+
+      - name: Upload application source
+        env:
+          CPANEL_SSH_HOST: ${{ secrets.CPANEL_SSH_HOST }}
+          CPANEL_SSH_PORT: ${{ secrets.CPANEL_SSH_PORT }}
+          CPANEL_SSH_USER: ${{ secrets.CPANEL_SSH_USER }}
+        run: |
+          rsync -az --delete \
+            --exclude='.git/' \
+            --exclude='node_modules/' \
+            --exclude='.next/' \
+            --exclude='.env' \
+            --exclude='.env.*' \
+            --exclude='public/uploads/' \
+            -e "ssh -i $HOME/.ssh/namastexpress_deploy -p $CPANEL_SSH_PORT" \
+            ./ "$CPANEL_SSH_USER@$CPANEL_SSH_HOST:/home/subhakam/namastexpress/"
+
+      - name: Install, migrate, build, and restart
+        env:
+          CPANEL_SSH_HOST: ${{ secrets.CPANEL_SSH_HOST }}
+          CPANEL_SSH_PORT: ${{ secrets.CPANEL_SSH_PORT }}
+          CPANEL_SSH_USER: ${{ secrets.CPANEL_SSH_USER }}
+        run: |
+          ssh -i "$HOME/.ssh/namastexpress_deploy" -p "$CPANEL_SSH_PORT" "$CPANEL_SSH_USER@$CPANEL_SSH_HOST" \
+            'cd /home/subhakam/namastexpress && npm ci && npx prisma migrate deploy && npm run build && mkdir -p tmp && touch tmp/restart.txt'
