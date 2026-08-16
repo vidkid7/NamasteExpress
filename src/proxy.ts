@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 const ADMIN_SECRET = process.env.ADMIN_SECRET_PATH || "admin";
-const adminPaths = ["/" + ADMIN_SECRET, "/api/v1/admin"];
+// Keep the secret path as an additional entry point, but allow `/admin` to
+// reach the normal authentication flow instead of silently redirecting away.
+const adminPaths = ["/admin", "/" + ADMIN_SECRET, "/api/v1/admin"];
 
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT_WINDOW = 60_000;
@@ -81,11 +83,6 @@ export function proxy(request: NextRequest) {
   const response = NextResponse.next();
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
   const isAdminPath = adminPaths.some((p) => pathname.startsWith(p));
-
-  // Block direct access to /admin — must use custom secret path
-  if ((pathname === "/admin" || pathname.startsWith("/admin/")) && ADMIN_SECRET !== "admin") {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
 
   if (
     pathname.startsWith("/api/") &&
