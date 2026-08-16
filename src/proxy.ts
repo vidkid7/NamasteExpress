@@ -70,9 +70,9 @@ export function proxy(request: NextRequest) {
     request.headers.get("x-forwarded-host")?.split(",")[0] || request.headers.get("host")
   );
 
-  if (process.env.NODE_ENV === "production" && host === "namastexpress.org") {
+  if (process.env.NODE_ENV === "production" && host === "www.namastexpress.org") {
     const canonicalUrl = request.nextUrl.clone();
-    canonicalUrl.hostname = "www.namastexpress.org";
+    canonicalUrl.hostname = "namastexpress.org";
     canonicalUrl.protocol = "https";
     canonicalUrl.port = "";
     return NextResponse.redirect(canonicalUrl);
