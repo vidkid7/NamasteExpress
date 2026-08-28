@@ -11,26 +11,35 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = request.nextUrl;
     const position = searchParams.get("position");
+    const adminView = searchParams.get("admin") === "true";
+
+    if (adminView) {
+      const { error } = await requireRole(["ADMIN"]);
+      if (error === "unauthorized") return unauthorizedResponse();
+      if (error === "forbidden") return forbiddenResponse();
+    }
 
     const now = new Date();
 
-    const where: Prisma.AdvertisementWhereInput = {
-      is_active: true,
-      AND: [
-        {
-          OR: [
-            { start_date: null },
-            { start_date: { lte: now } },
+    const where: Prisma.AdvertisementWhereInput = adminView
+      ? {}
+      : {
+          is_active: true,
+          AND: [
+            {
+              OR: [
+                { start_date: null },
+                { start_date: { lte: now } },
+              ],
+            },
+            {
+              OR: [
+                { end_date: null },
+                { end_date: { gte: now } },
+              ],
+            },
           ],
-        },
-        {
-          OR: [
-            { end_date: null },
-            { end_date: { gte: now } },
-          ],
-        },
-      ],
-    };
+        };
 
     if (position && VALID_POSITIONS.includes(position as AdPositionType)) {
       where.position = { type: position as AdPositionType };

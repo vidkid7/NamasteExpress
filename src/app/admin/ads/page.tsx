@@ -86,7 +86,7 @@ export default function AdminAdsPage() {
 
   async function loadAds() {
     try {
-      const res = await fetch("/api/v1/ads");
+      const res = await fetch("/api/v1/ads?admin=true");
       const json = await res.json();
       if (json.success) setAds(json.data || []);
     } catch { /* ignore */ }
