@@ -95,7 +95,16 @@ export async function POST(request: NextRequest) {
 
     // ── URL-based registration ──────────────────────────────────
     if (contentType.includes("application/json")) {
-      const body = await request.json() as { url?: string; alt_text?: string };
+      const body = await request.json() as {
+        url?: string;
+        alt_text?: string;
+        original_name?: string;
+        mime_type?: string;
+        size?: number;
+        width?: number;
+        height?: number;
+        public_id?: string;
+      };
       const rawUrl: string = (body.url ?? "").trim();
       if (!rawUrl) {
         return NextResponse.json<ApiResponse>(
@@ -127,18 +136,43 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
-      const filename = `url-${Date.now()}${ext}`;
-      const original_name = decodeURIComponent(path.basename(urlObj.pathname)) || filename;
+      const filename = `url-${Date.now()}-${crypto.randomUUID()}${ext}`;
+      const extensionMimeTypes: Record<string, string> = {
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".png": "image/png",
+        ".gif": "image/gif",
+        ".webp": "image/webp",
+        ".avif": "image/avif",
+      };
+      const original_name = sanitizeOriginalFilename(
+        typeof body.original_name === "string" && body.original_name.trim()
+          ? body.original_name
+          : decodeURIComponent(path.basename(urlObj.pathname)) || filename
+      );
+      const size = typeof body.size === "number" && Number.isFinite(body.size) && body.size >= 0
+        ? Math.min(Math.floor(body.size), 100 * 1024 * 1024)
+        : 0;
+      const width = typeof body.width === "number" && Number.isFinite(body.width) && body.width > 0
+        ? Math.min(Math.floor(body.width), 100_000)
+        : undefined;
+      const height = typeof body.height === "number" && Number.isFinite(body.height) && body.height > 0
+        ? Math.min(Math.floor(body.height), 100_000)
+        : undefined;
+      const publicId = typeof body.public_id === "string" ? body.public_id.trim().slice(0, 255) : "";
 
       const mediaFile = await prisma.mediaFile.create({
         data: {
           filename,
           original_name,
-          mime_type: "image/jpeg", // placeholder; browser shows actual content
-          size: 0,
+          mime_type: extensionMimeTypes[ext],
+          size,
           url: rawUrl,
           alt_text: (body.alt_text ?? "").trim().slice(0, 500) || null,
           uploaded_by: session!.user.id,
+          width,
+          height,
+          variants: publicId ? { cloudinary_public_id: publicId } : undefined,
         },
       });
 

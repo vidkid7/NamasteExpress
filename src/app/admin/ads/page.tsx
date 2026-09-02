@@ -16,6 +16,7 @@ import {
   PanelBottom,
   MessageSquare,
 } from "lucide-react";
+import { uploadMediaFile } from "@/lib/client-media-upload";
 
 export const dynamic = "force-dynamic";
 
@@ -105,18 +106,15 @@ export default function AdminAdsPage() {
     if (!file) return;
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch("/api/v1/media", { method: "POST", body: formData });
-      const json = await res.json();
-      if (json.success && json.data?.url) {
-        setImageUrl(json.data.url);
+      const uploaded = await uploadMediaFile(file, title || "advertisement");
+      if (uploaded.url) {
+        setImageUrl(uploaded.url);
         showMessage("Image uploaded!");
       } else {
-        showMessage(json.error || "Upload failed", "error");
+        showMessage("Upload failed", "error");
       }
-    } catch {
-      showMessage("Upload failed", "error");
+    } catch (error) {
+      showMessage(error instanceof Error ? error.message : "Upload failed", "error");
     }
     setUploading(false);
   }
