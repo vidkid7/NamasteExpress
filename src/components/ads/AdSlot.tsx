@@ -24,7 +24,7 @@ export function AdSlot({ position, className = "" }: AdSlotProps) {
   useEffect(() => {
     async function loadAd() {
       try {
-        const res = await fetch(`/api/v1/placements?position=${position}`);
+        const res = await fetch(`/placements?position=${position}`);
         const json = await res.json();
         if (json.success && json.data?.length > 0) {
           const ads: Ad[] = json.data;
@@ -32,7 +32,7 @@ export function AdSlot({ position, className = "" }: AdSlotProps) {
           setAd(selected);
           if (!impressionTracked.current) {
             impressionTracked.current = true;
-            fetch(`/api/v1/placements/${selected.id}/impression`, { method: "POST" }).catch(() => {});
+            fetch(`/placements/${selected.id}/impression`, { method: "POST" }).catch(() => {});
           }
         }
       } catch {
@@ -47,7 +47,7 @@ export function AdSlot({ position, className = "" }: AdSlotProps) {
   }
 
   const handleClick = () => {
-    fetch(`/api/v1/placements/${ad.id}/click`, { method: "POST" }).catch(() => {});
+    fetch(`/placements/${ad.id}/click`, { method: "POST" }).catch(() => {});
   };
 
   const width = ad.position.width || 728;

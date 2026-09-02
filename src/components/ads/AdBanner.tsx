@@ -25,7 +25,7 @@ export function AdBanner({ position, className = "" }: AdBannerProps) {
 
     async function loadAd() {
       try {
-        const res = await fetch(`/api/v1/placements?position=${position}`, { signal: controller.signal });
+        const res = await fetch(`/placements?position=${position}`, { signal: controller.signal });
         const json = await res.json();
         if (json.success && json.data?.length > 0) {
           const ads: Ad[] = json.data;
@@ -34,7 +34,7 @@ export function AdBanner({ position, className = "" }: AdBannerProps) {
 
           if (!impressionTracked.current) {
             impressionTracked.current = true;
-            fetch(`/api/v1/placements/${selected.id}/impression`, { method: "POST" }).catch(() => {});
+            fetch(`/placements/${selected.id}/impression`, { method: "POST" }).catch(() => {});
           }
         }
       } catch {
@@ -50,7 +50,7 @@ export function AdBanner({ position, className = "" }: AdBannerProps) {
 
   function handleClick() {
     if (ad) {
-      fetch(`/api/v1/placements/${ad.id}/click`, { method: "POST" }).catch(() => {});
+      fetch(`/placements/${ad.id}/click`, { method: "POST" }).catch(() => {});
     }
   }
 
