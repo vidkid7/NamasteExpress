@@ -10,9 +10,22 @@ interface AdSlotProps {
   className?: string;
 }
 
+function readInitialHeaderAd(): PublicAd | null {
+  if (typeof document === "undefined") return null;
+
+  const element = document.getElementById("initial-header-ad");
+  if (!element?.textContent) return null;
+
+  try {
+    return JSON.parse(element.textContent) as PublicAd | null;
+  } catch {
+    return null;
+  }
+}
+
 export function AdSlot({ position, className = "", initialAd }: AdSlotProps & { initialAd?: PublicAd | null }) {
   const headerAd = useHeaderAd();
-  const seededAd = initialAd ?? (position === "HEADER" ? headerAd : null);
+  const seededAd = initialAd ?? (position === "HEADER" ? headerAd ?? readInitialHeaderAd() : null);
   const [ad, setAd] = useState<PublicAd | null>(seededAd);
   const [imgError, setImgError] = useState(false);
   const impressionTracked = useRef(false);

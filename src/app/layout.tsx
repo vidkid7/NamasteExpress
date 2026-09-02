@@ -120,6 +120,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const initialHeaderAd = await getInitialHeaderAd();
+  const initialHeaderAdPayload = JSON.stringify(initialHeaderAd).replace(/</g, "\\u003c");
 
   return (
     <html
@@ -142,6 +143,11 @@ export default async function RootLayout({
       </head>
       <body className="min-h-full flex flex-col">
         <LoadingScreen splash minDisplayMs={0} />
+        <script
+          id="initial-header-ad"
+          type="application/json"
+          dangerouslySetInnerHTML={{ __html: initialHeaderAdPayload }}
+        />
         <Providers initialHeaderAd={initialHeaderAd}>{children}</Providers>
       </body>
     </html>
