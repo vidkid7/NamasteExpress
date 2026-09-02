@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import { useHeaderAd } from "@/contexts/AdContext";
 import type { PublicAd } from "@/types/ads";
 
@@ -27,7 +26,6 @@ export function AdSlot({ position, className = "", initialAd }: AdSlotProps & { 
   const headerAd = useHeaderAd();
   const seededAd = initialAd ?? (position === "HEADER" ? headerAd ?? readInitialHeaderAd() : null);
   const [ad, setAd] = useState<PublicAd | null>(seededAd);
-  const [imgError, setImgError] = useState(false);
   const impressionTracked = useRef(false);
 
   useEffect(() => {
@@ -60,7 +58,7 @@ export function AdSlot({ position, className = "", initialAd }: AdSlotProps & { 
     loadAd();
   }, [position, seededAd]);
 
-  if (!ad || imgError) {
+  if (!ad) {
     return null;
   }
 
@@ -75,9 +73,8 @@ export function AdSlot({ position, className = "", initialAd }: AdSlotProps & { 
     <div className={className} data-position={position}>
       <a href={ad.target_url} target="_blank" rel="noopener noreferrer sponsored" onClick={handleClick} className="block">
         {ad.image_url ? (
-          <Image src={ad.image_url} alt={ad.title} width={width} height={height}
-            className="w-full h-auto rounded-lg" unoptimized
-            onError={() => setImgError(true)} />
+          <img src={ad.image_url} alt={ad.title} width={width} height={height}
+            className="w-full h-auto rounded-lg" />
         ) : null}
       </a>
     </div>
