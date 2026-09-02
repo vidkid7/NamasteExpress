@@ -3,6 +3,37 @@ import { Noto_Serif_Devanagari, Noto_Sans_Devanagari, DM_Sans } from "next/font/
 import "./globals.css";
 import { Providers } from "@/components/layout/Providers";
 import { LoadingScreen } from "@/components/ui/LoadingScreen";
+import prisma from "@/lib/prisma";
+import type { PublicAd } from "@/types/ads";
+
+async function getInitialHeaderAd(): Promise<PublicAd | null> {
+  const now = new Date();
+
+  try {
+    return await prisma.advertisement.findFirst({
+      where: {
+        is_active: true,
+        position: { type: "HEADER" },
+        AND: [
+          { OR: [{ start_date: null }, { start_date: { lte: now } }] },
+          { OR: [{ end_date: null }, { end_date: { gte: now } }] },
+        ],
+      },
+      select: {
+        id: true,
+        title: true,
+        image_url: true,
+        target_url: true,
+        position: { select: { type: true, width: true, height: true } },
+      },
+      orderBy: { created_at: "desc" },
+    });
+  } catch {
+    return null;
+  }
+}
+
+export const dynamic = "force-dynamic";
 
 const notoSerifDevanagari = Noto_Serif_Devanagari({
   variable: "--font-nepali-serif",
@@ -83,11 +114,13 @@ const themeScript = `
   })();
 `;
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const initialHeaderAd = await getInitialHeaderAd();
+
   return (
     <html
       lang="ne"
@@ -109,7 +142,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col">
         <LoadingScreen splash minDisplayMs={0} />
-        <Providers>{children}</Providers>
+        <Providers initialHeaderAd={initialHeaderAd}>{children}</Providers>
       </body>
     </html>
   );

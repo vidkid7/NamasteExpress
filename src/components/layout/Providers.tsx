@@ -8,18 +8,22 @@ import { CookieConsent } from "@/components/ui/CookieConsent";
 import { OfflineIndicator } from "@/components/ui/OfflineIndicator";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { OptionalSessionProvider } from "@/components/layout/OptionalSessionProvider";
+import { AdProvider } from "@/contexts/AdContext";
+import type { PublicAd } from "@/types/ads";
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export function Providers({ children, initialHeaderAd = null }: { children: React.ReactNode; initialHeaderAd?: PublicAd | null }) {
   return (
     <OptionalSessionProvider>
       <ThemeProvider>
         <FontSizeProvider>
           <LanguageProvider>
             <SiteConfigProvider>
-              <OfflineIndicator />
-              {children}
-              <MobileBottomNav />
-              <CookieConsent />
+              <AdProvider headerAd={initialHeaderAd}>
+                <OfflineIndicator />
+                {children}
+                <MobileBottomNav />
+                <CookieConsent />
+              </AdProvider>
             </SiteConfigProvider>
           </LanguageProvider>
         </FontSizeProvider>

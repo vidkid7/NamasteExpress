@@ -2,32 +2,37 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { useHeaderAd } from "@/contexts/AdContext";
+import type { PublicAd } from "@/types/ads";
 
 interface AdSlotProps {
   position: string;
   className?: string;
 }
 
-interface Ad {
-  id: string;
-  title: string;
-  image_url: string | null;
-  target_url: string;
-  position: { type: string; width?: number | null; height?: number | null };
-}
-
-export function AdSlot({ position, className = "" }: AdSlotProps) {
-  const [ad, setAd] = useState<Ad | null>(null);
+export function AdSlot({ position, className = "", initialAd }: AdSlotProps & { initialAd?: PublicAd | null }) {
+  const headerAd = useHeaderAd();
+  const seededAd = initialAd ?? (position === "HEADER" ? headerAd : null);
+  const [ad, setAd] = useState<PublicAd | null>(seededAd);
   const [imgError, setImgError] = useState(false);
   const impressionTracked = useRef(false);
 
   useEffect(() => {
+    if (seededAd) {
+      setAd(seededAd);
+      if (!impressionTracked.current) {
+        impressionTracked.current = true;
+        fetch(`/placements/${seededAd.id}/impression`, { method: "POST" }).catch(() => {});
+      }
+      return;
+    }
+
     async function loadAd() {
       try {
         const res = await fetch(`/placements?position=${position}`);
         const json = await res.json();
         if (json.success && json.data?.length > 0) {
-          const ads: Ad[] = json.data;
+          const ads: PublicAd[] = json.data;
           const selected = ads[Math.floor(Math.random() * ads.length)];
           setAd(selected);
           if (!impressionTracked.current) {
@@ -40,7 +45,7 @@ export function AdSlot({ position, className = "" }: AdSlotProps) {
       }
     }
     loadAd();
-  }, [position]);
+  }, [position, seededAd]);
 
   if (!ad || imgError) {
     return null;
