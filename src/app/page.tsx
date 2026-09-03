@@ -486,11 +486,6 @@ export default async function HomePage() {
       {/* Latest Updates floating panel */}
       <LatestUpdatesPanel />
 
-      {/* Header Banner Ad */}
-      <div className="mx-auto hidden max-w-7xl px-4 pt-4 md:block">
-        <AdSlot position="HEADER" />
-      </div>
-
       <main className="mx-auto w-full max-w-7xl min-w-0 px-3 sm:px-4 py-5 sm:py-8 space-y-10 sm:space-y-14 pb-6 sm:pb-10">
         {/* Hero */}
         <Suspense fallback={<HeroSkeleton />}>
