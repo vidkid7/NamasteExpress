@@ -51,6 +51,20 @@ const AD_POSITION_TYPES = [
   { value: "POPUP", label: "Popup", icon: <MessageSquare className="h-4 w-4" /> },
 ];
 
+function getAdminPreviewSrc(ad: Ad) {
+  if (!ad.image_url) return null;
+
+  const now = Date.now();
+  const isPubliclyEligible =
+    ad.is_active &&
+    (!ad.start_date || new Date(ad.start_date).getTime() <= now) &&
+    (!ad.end_date || new Date(ad.end_date).getTime() >= now);
+
+  return isPubliclyEligible
+    ? getAdImageSrc(ad.id, ad.image_url)
+    : ad.image_url;
+}
+
 export default function AdminAdsPage() {
   const [ads, setAds] = useState<Ad[]>([]);
   const [positions, setPositions] = useState<AdPosition[]>([]);
@@ -317,7 +331,21 @@ export default function AdminAdsPage() {
                         </span>
                       </td>
                       <td className="p-3">
-                        {getAdImageSrc(ad.id, ad.image_url ?? null) ? <img src={getAdImageSrc(ad.id, ad.image_url ?? null)!} alt="" className="h-8 w-auto max-w-32 rounded object-contain" /> : <span className="text-xs" style={{ color: "var(--muted)" }}>No image</span>}
+                        {(() => {
+                          const previewSrc = getAdminPreviewSrc(ad);
+                          return previewSrc ? (
+                            <img
+                              src={previewSrc}
+                              alt=""
+                              onError={(event) => {
+                                if (ad.image_url && event.currentTarget.src !== ad.image_url) {
+                                  event.currentTarget.src = ad.image_url;
+                                }
+                              }}
+                              className="h-8 w-auto max-w-32 rounded object-contain"
+                            />
+                          ) : <span className="text-xs" style={{ color: "var(--muted)" }}>No image</span>;
+                        })()}
                       </td>
                       <td className="p-3 font-mono" style={{ color: "var(--muted)" }}>{ad.impressions.toLocaleString()}</td>
                       <td className="p-3 font-mono" style={{ color: "var(--muted)" }}>{ad.clicks.toLocaleString()}</td>
