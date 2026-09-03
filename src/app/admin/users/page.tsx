@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth-helpers";
 import { redirect } from "next/navigation";
 import { AdminUserRoleSelect } from "@/components/admin/AdminUserRoleSelect";
+import { AdminCreateUserForm } from "@/components/admin/AdminCreateUserForm";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +30,8 @@ export default async function AdminUsersPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Users</h1>
+
+      <AdminCreateUserForm />
 
       <div className="card overflow-x-auto">
         <table className="w-full text-sm">
