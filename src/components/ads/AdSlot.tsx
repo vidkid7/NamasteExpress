@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useHeaderAd } from "@/contexts/AdContext";
 import type { PublicAd } from "@/types/ads";
+import { getAdImageSrc } from "@/lib/ad-image";
 
 interface AdSlotProps {
   position: string;
@@ -68,12 +69,13 @@ export function AdSlot({ position, className = "", initialAd }: AdSlotProps & { 
 
   const width = ad.position.width || 728;
   const height = ad.position.height || 90;
+  const imageSrc = getAdImageSrc(ad.id, ad.image_url);
 
   return (
     <div className={className} data-position={position}>
       <a href={ad.target_url} target="_blank" rel="noopener noreferrer sponsored" onClick={handleClick} className="block">
-        {ad.image_url ? (
-          <img src={ad.image_url} alt={ad.title} width={width} height={height}
+        {imageSrc ? (
+          <img src={imageSrc} alt={ad.title} width={width} height={height}
             className="w-full h-auto rounded-lg" />
         ) : null}
       </a>

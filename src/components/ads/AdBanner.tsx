@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { getAdImageSrc } from "@/lib/ad-image";
 
 interface AdBannerProps {
   position: string;
@@ -62,9 +63,9 @@ export function AdBanner({ position, className = "" }: AdBannerProps) {
         rel="noopener noreferrer sponsored"
         onClick={handleClick}
       >
-        {ad.image_url ? (
+        {getAdImageSrc(ad.id, ad.image_url) ? (
           <Image
-            src={ad.image_url}
+            src={getAdImageSrc(ad.id, ad.image_url)!}
             alt={ad.title}
             width={728}
             height={90}
