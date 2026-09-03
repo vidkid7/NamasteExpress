@@ -271,7 +271,7 @@ export function Header() {
           </Link>
 
           {/* Banner Ad — hidden automatically when no ad is available */}
-          <div className="hidden md:flex min-w-0 items-center justify-center flex-1 max-w-lg">
+          <div className="hidden md:flex min-w-0 w-full max-w-[320px] items-center justify-center lg:max-w-[380px] xl:max-w-[460px] 2xl:max-w-[500px]">
             <AdSlot position="HEADER" className="w-full" />
           </div>
 
