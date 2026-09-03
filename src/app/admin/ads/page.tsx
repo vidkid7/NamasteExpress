@@ -14,7 +14,6 @@ import {
   FileText,
   BarChart3,
   PanelBottom,
-  MessageSquare,
 } from "lucide-react";
 import { uploadMediaFile } from "@/lib/client-media-upload";
 import { getAdImageSrc } from "@/lib/ad-image";
@@ -45,12 +44,11 @@ interface AdPosition {
 }
 
 const AD_POSITION_TYPES = [
-  { value: "HEADER", label: "Header Banner", icon: <PanelTop className="h-4 w-4" /> },
-  { value: "SIDEBAR", label: "Sidebar", icon: <PanelRight className="h-4 w-4" /> },
-  { value: "IN_ARTICLE", label: "In Article", icon: <FileText className="h-4 w-4" /> },
-  { value: "BETWEEN_SECTIONS", label: "Between Sections", icon: <BarChart3 className="h-4 w-4" /> },
-  { value: "FOOTER", label: "Footer", icon: <PanelBottom className="h-4 w-4" /> },
-  { value: "POPUP", label: "Popup", icon: <MessageSquare className="h-4 w-4" /> },
+  { value: "HEADER", label: "Header Banner", recommended: "Medium / Leaderboard", icon: <PanelTop className="h-4 w-4" /> },
+  { value: "SIDEBAR", label: "Sidebar", recommended: "Rectangle / Half page", icon: <PanelRight className="h-4 w-4" /> },
+  { value: "IN_ARTICLE", label: "In Article", recommended: "Medium / Rectangle", icon: <FileText className="h-4 w-4" /> },
+  { value: "BETWEEN_SECTIONS", label: "Between Sections", recommended: "Medium / Leaderboard", icon: <BarChart3 className="h-4 w-4" /> },
+  { value: "FOOTER", label: "Footer", recommended: "Medium / Leaderboard", icon: <PanelBottom className="h-4 w-4" /> },
 ];
 
 function getAdminPreviewSrc(ad: Ad) {
@@ -122,6 +120,16 @@ export default function AdminAdsPage() {
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      showMessage("Please choose an image file, including GIF, PNG, JPG, WEBP, or AVIF.", "error");
+      e.target.value = "";
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      showMessage("Image must be 5 MB or smaller.", "error");
+      e.target.value = "";
+      return;
+    }
     setUploading(true);
     try {
       const uploaded = await uploadMediaFile(file, title || "advertisement");
@@ -139,6 +147,10 @@ export default function AdminAdsPage() {
 
   async function createAd(e: React.FormEvent) {
     e.preventDefault();
+    if (startDate && endDate && endDate < startDate) {
+      showMessage("End date must be on or after the start date.", "error");
+      return;
+    }
     const res = await fetch(editingAdId ? `/api/v1/ads/${editingAdId}` : "/api/v1/ads", {
       method: editingAdId ? "PUT" : "POST",
       headers: { "Content-Type": "application/json" },
@@ -289,21 +301,22 @@ export default function AdminAdsPage() {
                 <label className="text-xs font-medium block mb-1" style={{ color: "var(--muted)" }}>Display size *</label>
                 <select value={adSize} onChange={(e) => setAdSize(e.target.value as AdSize)} className={inputCls} style={inputStyle}>
                   {AD_SIZE_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label} — {option.description}</option>
+                    <option key={option.value} value={option.value}>{option.label} — {option.dimensions} — {option.description}</option>
                   ))}
                 </select>
-                <p className="mt-1 text-[11px]" style={{ color: "var(--muted)" }}>Maximum width only; the full image ratio is always preserved.</p>
+                <p className="mt-1 text-[11px]" style={{ color: "var(--muted)" }}>Maximum width only; the original image ratio is preserved and the creative is never cropped.</p>
               </div>
               <div className="sm:col-span-2 lg:col-span-3">
                 <label className="text-xs font-medium block mb-1" style={{ color: "var(--muted)" }}>Image</label>
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                   <input type="url" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="Image URL or upload..." className={`${inputCls} flex-1`} style={inputStyle} />
-                  <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                  <input ref={fileInputRef} type="file" accept="image/gif,image/jpeg,image/png,image/webp,image/avif" className="hidden" onChange={handleImageUpload} />
                   <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploading}
                     className="px-4 py-2.5 rounded-lg text-sm font-medium shrink-0 w-full sm:w-auto" style={{ background: "var(--primary)", color: "#fff", opacity: uploading ? 0.6 : 1 }}>
                     {uploading ? "Uploading..." : <span className="inline-flex items-center gap-2"><Upload className="h-4 w-4" />Upload</span>}
                   </button>
                 </div>
+                <p className="mt-1 text-[11px]" style={{ color: "var(--muted)" }}>GIF, JPG, PNG, WEBP, or AVIF up to 5 MB. Upload the original creative; it stays fully visible on every device.</p>
                 {imageUrl && <img src={imageUrl} alt="Preview" className="mt-2 max-h-20 rounded-lg" />}
               </div>
               <div>
@@ -405,6 +418,10 @@ export default function AdminAdsPage() {
         </>
       ) : (
         <>
+          <div className="p-4 rounded-xl text-sm" style={{ background: "var(--primary-light)", border: "1px solid var(--border)", color: "var(--foreground)" }}>
+            <p className="font-semibold">Responsive placement guide</p>
+            <p className="mt-1" style={{ color: "var(--muted)" }}>Available public placements are Header, Sidebar, In Article, Between Sections, and Footer. Popup is intentionally not offered because it is intrusive and has no public renderer. Choose a format that matches the placement, then the ad scales down to the device width without cropping.</p>
+          </div>
           {/* Create Position Form */}
           <div className="p-5 rounded-xl space-y-4" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
             <h2 className="text-lg font-bold" style={{ color: "var(--foreground)" }}>Create Ad Position</h2>
@@ -417,7 +434,7 @@ export default function AdminAdsPage() {
                 <label className="text-xs font-medium block mb-1" style={{ color: "var(--muted)" }}>Type *</label>
                 <select value={posType} onChange={(e) => setPosType(e.target.value)} className={inputCls} style={inputStyle}>
                   {AD_POSITION_TYPES.map((t) => (
-                    <option key={t.value} value={t.value}>{t.label}</option>
+                    <option key={t.value} value={t.value}>{t.label} — suggested {t.recommended}</option>
                   ))}
                 </select>
               </div>

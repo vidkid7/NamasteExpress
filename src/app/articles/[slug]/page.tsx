@@ -6,6 +6,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ArticleCard } from "@/components/articles/ArticleCard";
 import { ArticleContent } from "@/components/articles/ArticleContent";
+import { AdSlot } from "@/components/ads/AdSlot";
 import { ArticleCardSkeleton } from "@/components/ui/SkeletonLoader";
 import { sanitizeArticleHtml } from "@/lib/html";
 import { canonicalUrl, defaultOpenGraphImage } from "@/lib/seo";
@@ -164,6 +165,9 @@ export default async function ArticlePage({ params }: Props) {
           published_at={article.published_at}
           articleId={article.id}
         />
+
+        {/* Non-intrusive in-article ad slot; the creative keeps its own aspect ratio. */}
+        <AdSlot position="IN_ARTICLE" className="my-6" />
 
         {/* Related articles */}
         <section className="mt-8 sm:mt-12">

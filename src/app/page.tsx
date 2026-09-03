@@ -516,6 +516,7 @@ export default async function HomePage() {
             <Suspense fallback={<SidebarSkeleton />}>
               <SidebarSection />
             </Suspense>
+            <AdSlot position="SIDEBAR" className="mt-6" />
           </div>
         </div>
 

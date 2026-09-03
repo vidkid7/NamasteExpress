@@ -68,8 +68,6 @@ export function AdSlot({ position, className = "", initialAd }: AdSlotProps & { 
     fetch(`/placements/${ad.id}/click`, { method: "POST" }).catch(() => {});
   };
 
-  const width = ad.position.width || 728;
-  const height = ad.position.height || 90;
   const imageSrc = getAdImageSrc(ad.id, ad.image_url);
   const adSize = normalizeAdSize(ad.ad_size);
   const maxWidth = getAdSizeMaxWidth(adSize, ad.position.width);
@@ -86,9 +84,9 @@ export function AdSlot({ position, className = "", initialAd }: AdSlotProps & { 
           <img
             src={imageSrc}
             alt={ad.title}
-            width={width}
-            height={height}
+            aria-label={ad.title}
             decoding="async"
+            loading={position === "HEADER" ? "eager" : "lazy"}
             className="block w-full max-w-full h-auto rounded-lg object-contain"
             onError={(event) => {
               if (ad.image_url && event.currentTarget.src !== ad.image_url) {
