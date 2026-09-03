@@ -52,6 +52,19 @@ export function ArticleBodyEditor({
     if (editor.innerHTML !== nextHtml) editor.innerHTML = nextHtml;
   }, [value]);
 
+  useEffect(() => {
+    if (uploading) return;
+
+    const editor = editorRef.current;
+    const range = savedSelectionRef.current;
+    const selection = window.getSelection();
+    if (!editor || !range || !selection || !editor.contains(range.commonAncestorContainer)) return;
+
+    editor.focus();
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }, [uploading]);
+
   function rememberSelection() {
     const editor = editorRef.current;
     const selection = window.getSelection();
