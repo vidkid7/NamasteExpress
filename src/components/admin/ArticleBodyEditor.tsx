@@ -60,9 +60,12 @@ export function ArticleBodyEditor({
     const selection = window.getSelection();
     if (!editor || !range || !selection || !editor.contains(range.commonAncestorContainer)) return;
 
+    selection.removeAllRanges();
+    selection.addRange(range);
     editor.focus();
     selection.removeAllRanges();
     selection.addRange(range);
+    savedSelectionRef.current = range.cloneRange();
   }, [uploading]);
 
   function rememberSelection() {
