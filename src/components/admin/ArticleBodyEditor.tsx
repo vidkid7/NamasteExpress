@@ -29,6 +29,28 @@ function normalizeEditorHtml(value: string) {
     .replace(/<\/div>/gi, "</p>");
 }
 
+function normalizeEditorDom(editor: HTMLDivElement) {
+  Array.from(editor.childNodes).forEach((node) => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      if (!node.textContent?.trim()) {
+        node.remove();
+        return;
+      }
+
+      const paragraph = document.createElement("p");
+      paragraph.textContent = node.textContent;
+      node.replaceWith(paragraph);
+      return;
+    }
+
+    if (node.nodeType === Node.ELEMENT_NODE && (node as HTMLElement).tagName === "DIV") {
+      const paragraph = document.createElement("p");
+      paragraph.innerHTML = (node as HTMLElement).innerHTML;
+      node.replaceWith(paragraph);
+    }
+  });
+}
+
 export function ArticleBodyEditor({
   id,
   label,
@@ -171,6 +193,7 @@ export function ArticleBodyEditor({
         data.data.url,
         imageAlt.trim() || file.name.replace(/\.[^/.]+$/, "")
       );
+      if (editorRef.current) normalizeEditorDom(editorRef.current);
       emitChange();
       rememberSelection();
       setImageAlt("");
@@ -267,7 +290,10 @@ export function ArticleBodyEditor({
           onFocus={rememberSelection}
           onKeyUp={rememberSelection}
           onMouseUp={rememberSelection}
-          onBlur={emitChange}
+          onBlur={() => {
+            if (editorRef.current) normalizeEditorDom(editorRef.current);
+            emitChange();
+          }}
           onPaste={(event) => {
             event.preventDefault();
             const text = event.clipboardData.getData("text/plain");
