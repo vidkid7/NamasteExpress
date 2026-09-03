@@ -3,6 +3,7 @@ import { requireRole } from "@/lib/auth-helpers";
 import { redirect } from "next/navigation";
 import { AdminUserRoleSelect } from "@/components/admin/AdminUserRoleSelect";
 import { AdminCreateUserForm } from "@/components/admin/AdminCreateUserForm";
+import { AdminDeleteUserButton } from "@/components/admin/AdminDeleteUserButton";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +43,7 @@ export default async function AdminUsersPage() {
               <th className="text-left p-3 font-medium" style={{ color: "var(--muted)" }}>Role</th>
               <th className="text-left p-3 font-medium" style={{ color: "var(--muted)" }}>Active</th>
               <th className="text-left p-3 font-medium" style={{ color: "var(--muted)" }}>Created At</th>
+              <th className="text-left p-3 font-medium" style={{ color: "var(--muted)" }}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -70,11 +72,18 @@ export default async function AdminUsersPage() {
                 <td className="p-3" style={{ color: "var(--muted)" }}>
                   {user.created_at.toLocaleDateString()}
                 </td>
+                <td className="p-3">
+                  <AdminDeleteUserButton
+                    userId={user.id}
+                    userName={user.name}
+                    isSelf={user.id === session?.user.id}
+                  />
+                </td>
               </tr>
             ))}
             {users.length === 0 && (
               <tr>
-                <td colSpan={5} className="p-8 text-center" style={{ color: "var(--muted)" }}>
+                <td colSpan={6} className="p-8 text-center" style={{ color: "var(--muted)" }}>
                   No users found
                 </td>
               </tr>
