@@ -56,7 +56,7 @@ function toEditorImageUrl(url: string) {
     const parsed = new URL(url, window.location.origin);
     if (parsed.origin === window.location.origin) return `${parsed.pathname}${parsed.search}`;
     if (parsed.hostname === "res.cloudinary.com") {
-      return `/_next/image?url=${encodeURIComponent(parsed.toString())}&w=640&q=85`;
+      return `/_next/image?url=${encodeURIComponent(parsed.toString())}&w=640&q=75`;
     }
   } catch {
     // Keep the returned URL if it is not an absolute URL that can be optimized.
