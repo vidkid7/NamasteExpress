@@ -4,6 +4,7 @@ import { requireRole, unauthorizedResponse, forbiddenResponse } from "@/lib/auth
 import { auditLog } from "@/lib/audit";
 import type { ApiResponse } from "@/types";
 import type { AdPositionType, Prisma } from "@prisma/client";
+import { isAdSize, normalizeAdSize } from "@/lib/ad-sizes";
 
 const VALID_POSITIONS: AdPositionType[] = ["HEADER", "SIDEBAR", "IN_ARTICLE", "FOOTER", "BETWEEN_SECTIONS", "POPUP"];
 
@@ -78,11 +79,18 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, image_url, target_url, position_id, start_date, end_date } = body;
+    const { title, image_url, target_url, position_id, start_date, end_date, ad_size } = body;
 
     if (!title || !target_url || !position_id) {
       return NextResponse.json<ApiResponse>(
         { success: false, error: "शीर्षक, लक्ष्य URL र स्थिति आवश्यक छ" },
+        { status: 400 }
+      );
+    }
+
+    if (ad_size !== undefined && !isAdSize(ad_size)) {
+      return NextResponse.json<ApiResponse>(
+        { success: false, error: "Invalid ad size" },
         { status: 400 }
       );
     }
@@ -103,6 +111,7 @@ export async function POST(request: NextRequest) {
         position_id,
         start_date: start_date ? new Date(start_date) : null,
         end_date: end_date ? new Date(end_date) : null,
+        ad_size: normalizeAdSize(ad_size),
       },
       include: {
         position: { select: { id: true, name: true, type: true } },

@@ -24,6 +24,7 @@ async function getInitialHeaderAd(): Promise<PublicAd | null> {
         title: true,
         image_url: true,
         target_url: true,
+        ad_size: true,
         position: { select: { type: true, width: true, height: true } },
       },
       orderBy: { created_at: "desc" },

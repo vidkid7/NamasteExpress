@@ -1,0 +1,2 @@
+ALTER TABLE "advertisements"
+ADD COLUMN "ad_size" TEXT NOT NULL DEFAULT 'MEDIUM';

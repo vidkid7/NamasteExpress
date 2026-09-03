@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireRole, unauthorizedResponse, forbiddenResponse } from "@/lib/auth-helpers";
 import { auditLog } from "@/lib/audit";
 import type { ApiResponse } from "@/types";
+import { isAdSize } from "@/lib/ad-sizes";
 
 export async function PUT(
   request: NextRequest,
@@ -41,6 +42,15 @@ export async function PUT(
     if (body.is_active !== undefined) updateData.is_active = body.is_active;
     if (body.start_date !== undefined) updateData.start_date = body.start_date ? new Date(body.start_date) : null;
     if (body.end_date !== undefined) updateData.end_date = body.end_date ? new Date(body.end_date) : null;
+    if (body.ad_size !== undefined) {
+      if (!isAdSize(body.ad_size)) {
+        return NextResponse.json<ApiResponse>(
+          { success: false, error: "Invalid ad size" },
+          { status: 400 }
+        );
+      }
+      updateData.ad_size = body.ad_size;
+    }
 
     const ad = await prisma.advertisement.update({
       where: { id },

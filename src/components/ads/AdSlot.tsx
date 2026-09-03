@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useHeaderAd } from "@/contexts/AdContext";
 import type { PublicAd } from "@/types/ads";
 import { getAdImageSrc } from "@/lib/ad-image";
+import { getAdSizeMaxWidth, normalizeAdSize } from "@/lib/ad-sizes";
 
 interface AdSlotProps {
   position: string;
@@ -70,13 +71,32 @@ export function AdSlot({ position, className = "", initialAd }: AdSlotProps & { 
   const width = ad.position.width || 728;
   const height = ad.position.height || 90;
   const imageSrc = getAdImageSrc(ad.id, ad.image_url);
+  const adSize = normalizeAdSize(ad.ad_size);
+  const maxWidth = getAdSizeMaxWidth(adSize, ad.position.width);
 
   return (
-    <div className={className} data-position={position}>
-      <a href={ad.target_url} target="_blank" rel="noopener noreferrer sponsored" onClick={handleClick} className="block">
+    <div
+      className={`ad-slot mx-auto w-full max-w-full p-[2px] ${className}`.trim()}
+      data-position={position}
+      data-ad-size={adSize}
+      style={{ maxWidth: maxWidth ? `${maxWidth}px` : undefined }}
+    >
+      <a href={ad.target_url} target="_blank" rel="noopener noreferrer sponsored" onClick={handleClick} className="block w-full">
         {imageSrc ? (
-          <img src={imageSrc} alt={ad.title} width={width} height={height}
-            className="w-full h-auto rounded-lg" />
+          <img
+            src={imageSrc}
+            alt={ad.title}
+            width={width}
+            height={height}
+            decoding="async"
+            className="block w-full max-w-full h-auto rounded-lg object-contain"
+            onError={(event) => {
+              if (ad.image_url && event.currentTarget.src !== ad.image_url) {
+                event.currentTarget.onerror = null;
+                event.currentTarget.src = ad.image_url;
+              }
+            }}
+          />
         ) : null}
       </a>
     </div>

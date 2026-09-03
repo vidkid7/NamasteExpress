@@ -672,6 +672,18 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: var(--radius-md);
   margin: 1.5rem 0;
 }
+
+.ad-slot {
+  overflow: visible;
+}
+
+.ad-slot img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
 .prose-news iframe,
 .prose-news video {
   display: block;

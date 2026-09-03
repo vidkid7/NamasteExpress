@@ -133,6 +133,7 @@ export function Header() {
   const [trendingTopics, setTrendingTopics] = useState<TrendingTopic[]>([]);
   const [today, setToday] = useState<Date | null>(null);
   const [scrolled, setScrolled] = useState(false);
+  const [isCompactViewport, setIsCompactViewport] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
@@ -144,7 +145,17 @@ export function Header() {
   useEffect(() => { setToday(new Date()); }, []);
   useEffect(() => { setMounted(true); }, []);
 
-  // Hide logo bar on scroll
+  // Keep the ad bar available on phones and tablets, including while the
+  // compact navigation is being used after a scroll.
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 1023px)");
+    const update = () => setIsCompactViewport(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
+  // Hide the desktop logo bar on scroll; compact viewports keep the ad visible.
   useEffect(() => {
     function onScroll() { setScrolled(window.scrollY > 10); }
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -218,16 +229,16 @@ export function Header() {
     <>
     <header className="sticky top-0 z-50" style={{ background: "var(--header-bg)", borderBottom: "1px solid var(--border)", backdropFilter: "blur(14px) saturate(180%)", WebkitBackdropFilter: "blur(14px) saturate(180%)" }}>
 
-      {/* ══════════ TIER 1: Logo Bar — clean white, hidden on scroll ══════════ */}
+      {/* ══════════ TIER 1: Logo + responsive ad bar ══════════ */}
       <div
-        className="border-b border-border overflow-hidden transition-all duration-300 hidden md:block"
-        style={{ maxHeight: scrolled ? 0 : 120, opacity: scrolled ? 0 : 1 }}
+        className="border-b border-border overflow-hidden transition-all duration-300"
+        style={{ maxHeight: scrolled && !isCompactViewport ? 0 : 2000, opacity: scrolled && !isCompactViewport ? 0 : 1 }}
       >
         {/* Thin accent rule — brand red top border */}
         <div style={{ height: 3, background: "var(--accent)" }} />
-        <div className="mx-auto max-w-7xl px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between gap-2 sm:gap-4">
+        <div className="mx-auto max-w-7xl px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-center lg:justify-between gap-2 sm:gap-4">
           {/* Logo + Site Name + Date */}
-          <Link href="/" className="flex items-center gap-2 sm:gap-3 shrink-0 min-w-0">
+          <Link href="/" className="hidden lg:flex items-center gap-2 sm:gap-3 shrink-0 min-w-0">
             {/* Logo image */}
             {config.site_logo && (
               <div className="shrink-0">
@@ -271,7 +282,7 @@ export function Header() {
           </Link>
 
           {/* Banner Ad — hidden automatically when no ad is available */}
-          <div className="hidden lg:flex min-w-0 w-full max-w-[360px] items-center justify-center xl:max-w-[400px] 2xl:max-w-[440px]">
+          <div className="flex min-w-0 w-full max-w-full sm:max-w-[420px] lg:max-w-[640px] items-center justify-center gap-[2px]">
             <AdSlot position="HEADER" className="w-full" />
           </div>
 

@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { uploadMediaFile } from "@/lib/client-media-upload";
 import { getAdImageSrc } from "@/lib/ad-image";
+import { AD_SIZE_OPTIONS, normalizeAdSize, type AdSize } from "@/lib/ad-sizes";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,7 @@ interface Ad {
   is_active: boolean;
   start_date?: string | null;
   end_date?: string | null;
+  ad_size?: AdSize | string | null;
   created_at: string;
   position: { id: string; name: string; type: string };
 }
@@ -81,6 +83,7 @@ export default function AdminAdsPage() {
   const [positionId, setPositionId] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [adSize, setAdSize] = useState<AdSize>("MEDIUM");
   const [editingAdId, setEditingAdId] = useState<string | null>(null);
 
   // Position form
@@ -142,12 +145,13 @@ export default function AdminAdsPage() {
       body: JSON.stringify({
         title, image_url: imageUrl || undefined, target_url: targetUrl,
         position_id: positionId, start_date: startDate || undefined, end_date: endDate || undefined,
+        ad_size: adSize,
       }),
     });
     const json = await res.json();
     if (json.success) {
       showMessage(editingAdId ? "Ad updated successfully!" : "Ad created successfully!");
-      setTitle(""); setImageUrl(""); setTargetUrl(""); setPositionId(""); setStartDate(""); setEndDate(""); setEditingAdId(null);
+      setTitle(""); setImageUrl(""); setTargetUrl(""); setPositionId(""); setStartDate(""); setEndDate(""); setAdSize("MEDIUM"); setEditingAdId(null);
       loadAds();
     } else {
       showMessage(json.error || "Error creating ad", "error");
@@ -162,6 +166,7 @@ export default function AdminAdsPage() {
     setPositionId(ad.position.id);
     setStartDate(ad.start_date ? ad.start_date.slice(0, 10) : "");
     setEndDate(ad.end_date ? ad.end_date.slice(0, 10) : "");
+    setAdSize(normalizeAdSize(ad.ad_size));
     setActiveTab("ads");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -260,7 +265,7 @@ export default function AdminAdsPage() {
           <div className="p-5 rounded-xl space-y-4" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-bold" style={{ color: "var(--foreground)" }}>{editingAdId ? "Edit Advertisement" : "Create Advertisement"}</h2>
-              {editingAdId && <button type="button" onClick={() => { setEditingAdId(null); setTitle(""); setImageUrl(""); setTargetUrl(""); setPositionId(""); setStartDate(""); setEndDate(""); }} className="text-sm" style={{ color: "var(--muted)" }}>Cancel edit</button>}
+              {editingAdId && <button type="button" onClick={() => { setEditingAdId(null); setTitle(""); setImageUrl(""); setTargetUrl(""); setPositionId(""); setStartDate(""); setEndDate(""); setAdSize("MEDIUM"); }} className="text-sm" style={{ color: "var(--muted)" }}>Cancel edit</button>}
             </div>
             <form onSubmit={createAd} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               <div>
@@ -279,6 +284,15 @@ export default function AdminAdsPage() {
               <div>
                 <label className="text-xs font-medium block mb-1" style={{ color: "var(--muted)" }}>Target URL *</label>
                 <input type="url" value={targetUrl} onChange={(e) => setTargetUrl(e.target.value)} placeholder="https://..." className={inputCls} style={inputStyle} required />
+              </div>
+              <div>
+                <label className="text-xs font-medium block mb-1" style={{ color: "var(--muted)" }}>Display size *</label>
+                <select value={adSize} onChange={(e) => setAdSize(e.target.value as AdSize)} className={inputCls} style={inputStyle}>
+                  {AD_SIZE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>{option.label} — {option.description}</option>
+                  ))}
+                </select>
+                <p className="mt-1 text-[11px]" style={{ color: "var(--muted)" }}>Maximum width only; the full image ratio is always preserved.</p>
               </div>
               <div className="sm:col-span-2 lg:col-span-3">
                 <label className="text-xs font-medium block mb-1" style={{ color: "var(--muted)" }}>Image</label>
@@ -314,7 +328,7 @@ export default function AdminAdsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr style={{ borderBottom: "2px solid var(--border)" }}>
-                  {["Title", "Position", "Preview", "Impressions", "Clicks", "CTR", "Status", "Actions"].map((h) => (
+                  {["Title", "Position", "Size", "Preview", "Impressions", "Clicks", "CTR", "Status", "Actions"].map((h) => (
                     <th key={h} className="text-left p-3 font-semibold text-xs uppercase tracking-wider" style={{ color: "var(--muted)" }}>{h}</th>
                   ))}
                 </tr>
@@ -328,6 +342,11 @@ export default function AdminAdsPage() {
                       <td className="p-3">
                         <span className="inline-block px-2 py-0.5 text-xs rounded-full font-medium" style={{ background: "var(--primary-light)", color: "var(--primary)" }}>
                           {ad.position.type}
+                        </span>
+                      </td>
+                      <td className="p-3">
+                        <span className="inline-block px-2 py-0.5 text-xs rounded-full font-medium" style={{ background: "var(--surface-alt)", color: "var(--muted)" }}>
+                          {normalizeAdSize(ad.ad_size)}
                         </span>
                       </td>
                       <td className="p-3">
@@ -375,7 +394,7 @@ export default function AdminAdsPage() {
                   );
                 })}
                 {ads.length === 0 && (
-                  <tr><td colSpan={8} className="p-12 text-center" style={{ color: "var(--muted)" }}>
+                  <tr><td colSpan={9} className="p-12 text-center" style={{ color: "var(--muted)" }}>
                     <p className="flex justify-center mb-2"><Megaphone className="h-8 w-8" /></p>
                     <p>No ads yet. Create your first advertisement above.</p>
                   </td></tr>
