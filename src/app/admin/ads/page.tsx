@@ -17,6 +17,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { uploadMediaFile } from "@/lib/client-media-upload";
+import { getAdImageSrc } from "@/lib/ad-image";
 
 export const dynamic = "force-dynamic";
 
@@ -316,7 +317,7 @@ export default function AdminAdsPage() {
                         </span>
                       </td>
                       <td className="p-3">
-                        {ad.image_url ? <img src={ad.image_url} alt="" className="h-8 rounded" /> : <span className="text-xs" style={{ color: "var(--muted)" }}>No image</span>}
+                        {getAdImageSrc(ad.id, ad.image_url ?? null) ? <img src={getAdImageSrc(ad.id, ad.image_url ?? null)!} alt="" className="h-8 w-auto max-w-32 rounded object-contain" /> : <span className="text-xs" style={{ color: "var(--muted)" }}>No image</span>}
                       </td>
                       <td className="p-3 font-mono" style={{ color: "var(--muted)" }}>{ad.impressions.toLocaleString()}</td>
                       <td className="p-3 font-mono" style={{ color: "var(--muted)" }}>{ad.clicks.toLocaleString()}</td>

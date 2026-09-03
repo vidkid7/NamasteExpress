@@ -668,8 +668,34 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--muted);
 }
 .prose-news img {
+  max-width: 100%;
   border-radius: var(--radius-md);
   margin: 1.5rem 0;
+}
+.prose-news iframe,
+.prose-news video {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  border: 0;
+}
+.prose-news iframe {
+  aspect-ratio: 16 / 9;
+  height: auto;
+}
+.prose-news video {
+  height: auto;
+}
+.prose-news pre {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.prose-news code {
+  overflow-wrap: anywhere;
+}
+.prose-news table {
+  max-width: 100%;
 }
 .prose-news ul, .prose-news ol {
   padding-left: 1.5rem;
@@ -1013,10 +1039,19 @@ html, body {
   box-sizing: border-box;
 }
 
-/* Ensure plain images never overflow their containers. Next/Image manages its own sizing. */
+/* Ensure plain images never overflow their containers. Keep height at its
+   normal CSS initial value so explicit h-full/h-8 component sizing wins. */
 img:not([data-nimg]) {
   max-width: 100%;
-  height: auto;
+}
+
+/* A scrollable card must be allowed to scroll its wide child content. The
+   base .card rule intentionally clips rounded corners, but that would clip
+   admin tables on narrow screens when both classes are used together. */
+.card.overflow-x-auto {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Touch-friendly tap targets — only explicit interactive controls, not all anchors */

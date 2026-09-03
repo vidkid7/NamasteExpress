@@ -126,7 +126,7 @@ function SidebarContent() {
       {/* Mobile toggle */}
       <button
         onClick={() => setOpen(!open)}
-        className="fixed top-4 left-4 z-50 md:hidden p-2.5 rounded-lg shadow-md border border-border"
+        className="fixed top-4 left-4 z-50 lg:hidden p-2.5 rounded-lg shadow-md border border-border"
         style={{ background: "var(--surface)", color: "var(--foreground)" }}
         aria-label="Toggle sidebar"
       >
@@ -138,8 +138,8 @@ function SidebarContent() {
       </button>
 
       <aside
-        className={`fixed md:static inset-y-0 left-0 z-40 flex flex-col transition-transform duration-200 ${
-          open ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        className={`fixed lg:static inset-y-0 left-0 z-40 flex flex-col transition-transform duration-200 ${
+          open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
         style={{
           width: "16rem",
@@ -255,7 +255,7 @@ function SidebarContent() {
       {/* Mobile overlay */}
       {open && (
         <div
-          className="fixed inset-0 z-30 bg-black/50 md:hidden"
+          className="fixed inset-0 z-30 bg-black/50 lg:hidden"
           onClick={() => setOpen(false)}
         />
       )}

@@ -68,14 +68,14 @@ export function ArticleContent({
   return (
     <article>
       {/* Breadcrumbs */}
-      <nav className="text-sm text-muted mb-4 flex items-center gap-1">
+      <nav className="mb-4 flex min-w-0 flex-wrap items-center gap-1 text-sm text-muted">
         <Link href="/" className="hover:text-accent">
           {t("common.home")}
         </Link>
         <span>/</span>
         <Link
           href={`/categories/${category.slug}`}
-          className="hover:text-accent"
+          className="min-w-0 max-w-full break-words hover:text-accent"
           style={{ fontFamily: "var(--font-nepali-serif)" }}
         >
           {catName}
