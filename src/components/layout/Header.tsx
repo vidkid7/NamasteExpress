@@ -132,8 +132,6 @@ export function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const [trendingTopics, setTrendingTopics] = useState<TrendingTopic[]>([]);
   const [today, setToday] = useState<Date | null>(null);
-  const [scrolled, setScrolled] = useState(false);
-  const [isCompactViewport, setIsCompactViewport] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
@@ -144,23 +142,6 @@ export function Header() {
 
   useEffect(() => { setToday(new Date()); }, []);
   useEffect(() => { setMounted(true); }, []);
-
-  // Keep the ad bar available on phones and tablets, including while the
-  // compact navigation is being used after a scroll.
-  useEffect(() => {
-    const media = window.matchMedia("(max-width: 1023px)");
-    const update = () => setIsCompactViewport(media.matches);
-    update();
-    media.addEventListener("change", update);
-    return () => media.removeEventListener("change", update);
-  }, []);
-
-  // Hide the desktop logo bar on scroll; compact viewports keep the ad visible.
-  useEffect(() => {
-    function onScroll() { setScrolled(window.scrollY > 10); }
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   // Fetch trending articles for the trending bar
   useEffect(() => {
@@ -227,13 +208,8 @@ export function Header() {
 
   return (
     <>
-    <header className="sticky top-0 z-50" style={{ background: "var(--header-bg)", borderBottom: "1px solid var(--border)", backdropFilter: "blur(14px) saturate(180%)", WebkitBackdropFilter: "blur(14px) saturate(180%)" }}>
-
       {/* ══════════ TIER 1: Logo + responsive ad bar ══════════ */}
-      <div
-        className="border-b border-border overflow-hidden transition-all duration-300"
-        style={{ maxHeight: scrolled && !isCompactViewport ? 0 : 2000, opacity: scrolled && !isCompactViewport ? 0 : 1 }}
-      >
+      <div className="relative z-50 border-b border-border overflow-hidden" style={{ background: "var(--header-bg)" }}>
         {/* Thin accent rule — brand red top border */}
         <div style={{ height: 3, background: "var(--accent)" }} />
         <div className="mx-auto max-w-7xl px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-center lg:justify-between gap-2 sm:gap-4">
@@ -338,6 +314,7 @@ export function Header() {
         </div>
       </div>
 
+    <header className="sticky top-0 z-50" style={{ background: "var(--header-bg)", borderBottom: "1px solid var(--border)", backdropFilter: "blur(14px) saturate(180%)", WebkitBackdropFilter: "blur(14px) saturate(180%)" }}>
       {/* ══════════ TIER 2: Clean Navigation Bar (white bg, red accent) ══════════ */}
       <div
         style={{
@@ -347,12 +324,10 @@ export function Header() {
       >
         <div className="mx-auto max-w-7xl px-3 sm:px-4 flex items-center justify-between min-h-[68px] py-1.5">
 
-          {/* Compact logo — always visible on mobile, scroll-based on md+ */}
+          {/* Compact logo — visible on mobile and tablet while the ad/logo tier scrolls away */}
           <Link
             href="/"
-            className={`items-center gap-2 shrink-0 mr-3 transition-all duration-300 ${
-              scrolled ? "flex opacity-100" : "flex md:hidden opacity-100 md:opacity-0"
-            }`}
+            className="flex lg:hidden items-center gap-2 shrink-0 mr-3"
           >
             {config.site_logo && (
               <div className="relative rounded-lg overflow-hidden ring-1 ring-border bg-white shrink-0" style={{ width: 56, height: 56 }}>

@@ -2,11 +2,37 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toNepaliDigits } from "@/contexts/LanguageContext";
 import { shortArticlePath } from "@/lib/public-articles";
 import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
 import { articleContentToDisplayHtml } from "@/lib/article-content";
+
+function FacebookShareIcon() {
+  return (
+    <svg aria-hidden="true" className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M24 12.073C24 5.446 18.627.073 12 .073S0 5.446 0 12.073c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953h-1.514c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073Z" />
+    </svg>
+  );
+}
+
+function XShareIcon() {
+  return (
+    <svg aria-hidden="true" className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932 6.064-6.933ZM17.61 20.644h2.039L6.486 3.24H4.298l13.312 17.404Z" />
+    </svg>
+  );
+}
+
+function CopyLinkIcon() {
+  return (
+    <svg aria-hidden="true" className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+    </svg>
+  );
+}
 
 interface ArticleContentProps {
   title: string;
@@ -44,6 +70,7 @@ export function ArticleContent({
   articleId,
 }: ArticleContentProps) {
   const { language, t } = useLanguage();
+  const [copied, setCopied] = useState(false);
 
   const displayTitle = language === "en" && title_en ? title_en : title;
   const displayContent = language === "en" && content_en ? content_en : content;
@@ -65,6 +92,16 @@ export function ArticleContent({
     typeof window !== "undefined"
       ? new URL(shortArticlePath(articleId), window.location.origin).toString()
       : `${process.env.NEXT_PUBLIC_SITE_URL || ""}${shortArticlePath(articleId)}`;
+
+  async function copyArticleLink() {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      setCopied(false);
+    }
+  }
 
   return (
     <article>
@@ -175,25 +212,29 @@ export function ArticleContent({
           href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="btn-secondary !py-2 !px-4 text-xs flex-1 sm:flex-none text-center"
+          aria-label="Share on Facebook"
+          className="btn-secondary !py-2 !px-2 sm:!px-4 text-xs flex-1 min-w-0 text-center text-[#1877f2]"
         >
+          <FacebookShareIcon />
           Facebook
         </a>
         <a
           href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(displayTitle)}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="btn-secondary !py-2 !px-4 text-xs flex-1 sm:flex-none text-center"
+          aria-label="Share on X/Twitter"
+          className="btn-secondary !py-2 !px-2 sm:!px-4 text-xs flex-1 min-w-0 text-center"
         >
+          <XShareIcon />
           X/Twitter
         </a>
         <button
-          onClick={() => {
-            navigator.clipboard.writeText(shareUrl);
-          }}
-          className="btn-secondary !py-2 !px-4 text-xs flex-1 sm:flex-none"
+          onClick={copyArticleLink}
+          aria-label={copied ? (language === "ne" ? "लिंक कपी भयो" : "Link copied") : t("common.copyLink")}
+          className="btn-secondary !py-2 !px-2 sm:!px-4 text-xs flex-1 min-w-0"
         >
-          {t("common.copyLink")}
+          <CopyLinkIcon />
+          {copied ? (language === "ne" ? "कपी भयो" : "Copied") : t("common.copyLink")}
         </button>
       </div>
 
