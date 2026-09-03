@@ -51,6 +51,20 @@ function normalizeEditorDom(editor: HTMLDivElement) {
   });
 }
 
+function toEditorImageUrl(url: string) {
+  try {
+    const parsed = new URL(url, window.location.origin);
+    if (parsed.origin === window.location.origin) return `${parsed.pathname}${parsed.search}`;
+    if (parsed.hostname === "res.cloudinary.com") {
+      return `/_next/image?url=${encodeURIComponent(parsed.toString())}&w=640&q=85`;
+    }
+  } catch {
+    // Keep the returned URL if it is not an absolute URL that can be optimized.
+  }
+
+  return url;
+}
+
 export function ArticleBodyEditor({
   id,
   label,
@@ -144,7 +158,7 @@ export function ArticleBodyEditor({
 
     const figure = document.createElement("figure");
     const image = document.createElement("img");
-    image.src = url;
+    image.src = toEditorImageUrl(url);
     image.alt = alt;
     image.loading = "lazy";
     figure.appendChild(image);
