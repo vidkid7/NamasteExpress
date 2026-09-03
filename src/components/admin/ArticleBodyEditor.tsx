@@ -21,14 +21,6 @@ interface ArticleBodyEditorProps {
   required?: boolean;
 }
 
-function escapeAttribute(value: string) {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/\"/g, "&quot;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-}
-
 function normalizeEditorHtml(value: string) {
   // Chromium emits div blocks from Enter in contenteditable surfaces. Store
   // them as paragraphs so the public renderer applies the same spacing.
@@ -94,6 +86,45 @@ export function ArticleBodyEditor({
     if (editor) onChange(normalizeEditorHtml(editor.innerHTML));
   }
 
+  function insertInlineImage(url: string, alt: string) {
+    const editor = editorRef.current;
+    if (!editor) return;
+
+    focusSavedSelection();
+    const selection = window.getSelection();
+    const range = selection?.rangeCount ? selection.getRangeAt(0) : null;
+    const insertRange = range && editor.contains(range.commonAncestorContainer)
+      ? range
+      : document.createRange();
+
+    if (!range || !editor.contains(range.commonAncestorContainer)) {
+      insertRange.selectNodeContents(editor);
+      insertRange.collapse(false);
+    }
+
+    insertRange.deleteContents();
+
+    const figure = document.createElement("figure");
+    const image = document.createElement("img");
+    image.src = url;
+    image.alt = alt;
+    image.loading = "lazy";
+    figure.appendChild(image);
+
+    const spacer = document.createElement("p");
+    spacer.appendChild(document.createElement("br"));
+
+    const fragment = document.createDocumentFragment();
+    fragment.append(figure, spacer);
+    insertRange.insertNode(fragment);
+
+    const nextRange = document.createRange();
+    nextRange.setStartAfter(spacer);
+    nextRange.collapse(true);
+    selection?.removeAllRanges();
+    selection?.addRange(nextRange);
+  }
+
   function runCommand(command: string, commandValue?: string) {
     focusSavedSelection();
     document.execCommand(command, false, commandValue);
@@ -120,13 +151,9 @@ export function ArticleBodyEditor({
         throw new Error(data?.error || "Image upload failed");
       }
 
-      focusSavedSelection();
-      document.execCommand(
-        "insertHTML",
-        false,
-        `<figure><img src="${escapeAttribute(data.data.url)}" alt="${escapeAttribute(
-          imageAlt.trim() || file.name.replace(/\.[^/.]+$/, "")
-        )}" loading="lazy" /></figure><p><br /></p>`
+      insertInlineImage(
+        data.data.url,
+        imageAlt.trim() || file.name.replace(/\.[^/.]+$/, "")
       );
       emitChange();
       rememberSelection();
