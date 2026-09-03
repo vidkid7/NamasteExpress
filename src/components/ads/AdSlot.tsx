@@ -6,6 +6,12 @@ import type { PublicAd } from "@/types/ads";
 import { getAdImageSrc } from "@/lib/ad-image";
 import { getAdSizeMaxWidth, normalizeAdSize } from "@/lib/ad-sizes";
 
+const TRACKING_REQUEST_INIT: RequestInit = {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  keepalive: true,
+};
+
 interface AdSlotProps {
   position: string;
   className?: string;
@@ -35,7 +41,7 @@ export function AdSlot({ position, className = "", initialAd }: AdSlotProps & { 
       setAd(seededAd);
       if (!impressionTracked.current) {
         impressionTracked.current = true;
-        fetch(`/placements/${seededAd.id}/impression`, { method: "POST" }).catch(() => {});
+        fetch(`/placements/${seededAd.id}/impression`, TRACKING_REQUEST_INIT).catch(() => {});
       }
       return;
     }
@@ -50,7 +56,7 @@ export function AdSlot({ position, className = "", initialAd }: AdSlotProps & { 
           setAd(selected);
           if (!impressionTracked.current) {
             impressionTracked.current = true;
-            fetch(`/placements/${selected.id}/impression`, { method: "POST" }).catch(() => {});
+            fetch(`/placements/${selected.id}/impression`, TRACKING_REQUEST_INIT).catch(() => {});
           }
         }
       } catch {
@@ -65,7 +71,7 @@ export function AdSlot({ position, className = "", initialAd }: AdSlotProps & { 
   }
 
   const handleClick = () => {
-    fetch(`/placements/${ad.id}/click`, { method: "POST" }).catch(() => {});
+    fetch(`/placements/${ad.id}/click`, TRACKING_REQUEST_INIT).catch(() => {});
   };
 
   const imageSrc = getAdImageSrc(ad.id, ad.image_url);
