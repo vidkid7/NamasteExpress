@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { adminPath } from "@/lib/admin-path";
+import { ArticleBodyEditor } from "@/components/admin/ArticleBodyEditor";
 
 export const dynamic = "force-dynamic";
 
@@ -172,13 +173,11 @@ export default function NewArticlePage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Content</label>
-                <textarea
+                <ArticleBodyEditor
+                  id="new-article-content"
+                  label="Content"
                   value={form.content}
-                  onChange={(e) => updateField("content", e.target.value)}
-                  rows={15}
-                  className="w-full px-3 py-2 rounded-md text-sm"
-                  style={inputStyle}
+                  onChange={(value) => updateField("content", value)}
                   required
                 />
                 <p className="text-xs mt-1" style={{ color: "var(--muted)" }}>

@@ -22,6 +22,11 @@ export function publicArticlePath(slug: string) {
   return publicContentPath("/articles", slug);
 }
 
+/** Compact share/redirect path that does not expose a long encoded Nepali slug. */
+export function shortArticlePath(id: string) {
+  return `/a/${encodeURIComponent(id)}`;
+}
+
 export function publicContentPath(basePath: string, slug: string) {
   return `${basePath}/${encodeURIComponent(slug)}`;
 }

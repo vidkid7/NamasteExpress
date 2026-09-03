@@ -4,8 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toNepaliDigits } from "@/contexts/LanguageContext";
-import { publicArticlePath } from "@/lib/public-articles";
+import { shortArticlePath } from "@/lib/public-articles";
 import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
+import { articleContentToDisplayHtml } from "@/lib/article-content";
 
 interface ArticleContentProps {
   title: string;
@@ -23,7 +24,7 @@ interface ArticleContentProps {
   word_count?: number | null;
   view_count: number;
   published_at?: Date | string | null;
-  slug: string;
+  articleId: string;
 }
 
 export function ArticleContent({
@@ -40,7 +41,7 @@ export function ArticleContent({
   word_count,
   view_count,
   published_at,
-  slug,
+  articleId,
 }: ArticleContentProps) {
   const { language, t } = useLanguage();
 
@@ -62,8 +63,8 @@ export function ArticleContent({
 
   const shareUrl =
     typeof window !== "undefined"
-      ? window.location.href
-      : `${process.env.NEXT_PUBLIC_SITE_URL || ""}${publicArticlePath(slug)}`;
+      ? new URL(shortArticlePath(articleId), window.location.origin).toString()
+      : `${process.env.NEXT_PUBLIC_SITE_URL || ""}${shortArticlePath(articleId)}`;
 
   return (
     <article>
@@ -149,7 +150,7 @@ export function ArticleContent({
       {/* Content */}
       <div
         className="prose-news mb-8"
-        dangerouslySetInnerHTML={{ __html: displayContent }}
+        dangerouslySetInnerHTML={{ __html: articleContentToDisplayHtml(displayContent) }}
       />
 
       {/* Tags */}

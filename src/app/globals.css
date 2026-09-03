@@ -650,6 +650,9 @@ h1, h2, h3, h4, h5, h6 {
 .prose-news p {
   margin-bottom: 1.25rem;
 }
+.prose-news > div {
+  margin-bottom: 1.25rem;
+}
 .prose-news a {
   color: var(--primary);
   text-decoration: underline;
@@ -724,6 +727,26 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 0.875rem;
   color: var(--muted);
   margin-top: 0.5rem;
+}
+
+/* Admin article editor */
+.article-editor-content:empty::before {
+  content: attr(data-placeholder);
+  color: var(--muted);
+  pointer-events: none;
+}
+.article-editor-content > div {
+  margin-bottom: 1.25rem;
+}
+.article-editor-content figure {
+  margin: 1.25rem 0;
+  max-width: 100%;
+}
+.article-editor-content figure img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0;
 }
 
 /* ─── Print Styles ─── */

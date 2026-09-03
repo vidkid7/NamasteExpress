@@ -162,7 +162,7 @@ export default async function ArticlePage({ params }: Props) {
           word_count={article.word_count}
           view_count={article.view_count}
           published_at={article.published_at}
-          slug={article.slug}
+          articleId={article.id}
         />
 
         {/* Related articles */}

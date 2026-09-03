@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { adminPath } from "@/lib/admin-path";
 import { publicArticlePath } from "@/lib/public-articles";
+import { ArticleBodyEditor } from "@/components/admin/ArticleBodyEditor";
 import {
   ArrowLeft,
   Trash2,
@@ -68,6 +69,7 @@ export function EditArticleForm({ article, categories, tags }: EditArticleFormPr
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -132,7 +134,6 @@ export function EditArticleForm({ article, categories, tags }: EditArticleFormPr
   }
 
   async function handleDelete() {
-    if (!confirm(`"${article.title}" लेख मेट्ने हो? यो कार्य पूर्ववत हुन सक्दैन।`)) return;
     setDeleting(true);
     setError("");
     try {
@@ -143,10 +144,12 @@ export function EditArticleForm({ article, categories, tags }: EditArticleFormPr
       } else {
         setError(data.error || "मेट्न सकिएन");
         setDeleting(false);
+        setConfirmDelete(false);
       }
     } catch {
       setError("नेटवर्क त्रुटि भयो");
       setDeleting(false);
+      setConfirmDelete(false);
     }
   }
 
@@ -209,7 +212,7 @@ export function EditArticleForm({ article, categories, tags }: EditArticleFormPr
         </div>
         <button
           type="button"
-          onClick={handleDelete}
+          onClick={() => setConfirmDelete(true)}
           disabled={deleting}
           className="btn-danger btn-sm shrink-0"
         >
@@ -254,6 +257,43 @@ export function EditArticleForm({ article, categories, tags }: EditArticleFormPr
       {success && (
         <div className="p-3 rounded-md text-sm" style={{ background: "#bbf7d0", color: "#166534" }}>
           {success}
+        </div>
+      )}
+
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="presentation">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-article-title"
+            className="w-full max-w-md rounded-lg p-5 shadow-xl"
+            style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+          >
+            <h2 id="delete-article-title" className="text-lg font-semibold">लेख मेटाउने हो?</h2>
+            <p className="mt-2 text-sm" style={{ color: "var(--muted)" }}>
+              &quot;{article.title}&quot; मेटिएपछि यो कार्य पूर्ववत गर्न सकिँदैन।
+            </p>
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(false)}
+                disabled={deleting}
+                className="rounded-md px-4 py-2 text-sm"
+                style={{ background: "var(--border)", color: "var(--foreground)" }}
+              >
+                रद्द गर्नुहोस्
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={deleting}
+                className="rounded-md px-4 py-2 text-sm font-medium"
+                style={{ background: "#dc2626", color: "#fff" }}
+              >
+                {deleting ? "मेटाउँदै..." : "मेट्नुहोस्"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -325,13 +365,11 @@ export function EditArticleForm({ article, categories, tags }: EditArticleFormPr
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">सामग्री (नेपाली) *</label>
-                <textarea
+                <ArticleBodyEditor
+                  id="edit-article-content"
+                  label="सामग्री (नेपाली)"
                   value={form.content}
-                  onChange={(e) => updateField("content", e.target.value)}
-                  rows={15}
-                  className="w-full px-3 py-2 rounded-md text-sm"
-                  style={inputStyle}
+                  onChange={(value) => updateField("content", value)}
                   required
                 />
                 <p className="text-xs mt-1" style={{ color: "var(--muted)" }}>
@@ -339,13 +377,11 @@ export function EditArticleForm({ article, categories, tags }: EditArticleFormPr
                 </p>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Content (English)</label>
-                <textarea
+                <ArticleBodyEditor
+                  id="edit-article-content-en"
+                  label="Content (English)"
                   value={form.content_en}
-                  onChange={(e) => updateField("content_en", e.target.value)}
-                  rows={8}
-                  className="w-full px-3 py-2 rounded-md text-sm"
-                  style={inputStyle}
+                  onChange={(value) => updateField("content_en", value)}
                 />
               </div>
               <div>
